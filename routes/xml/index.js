@@ -36,7 +36,7 @@ module.exports = async (fastify, opts) => {
         queryString,
         datas
       );
-      return { error: null, data: queryString };
+      return { error: null, data: properties };
     }
 
     return {
