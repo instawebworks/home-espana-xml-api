@@ -26,7 +26,7 @@ module.exports = async (fastify, opts) => {
         );
         datas.push(crm_record_id);
         datas.push(status);
-        data.push(modified_time);
+        datas.push(modified_time);
         datas.push(xml_data);
       }
       const queryString = `INSERT INTO properties (crm_record_id, status, modified_time, xml_data ) values ${insert_properties.join(
