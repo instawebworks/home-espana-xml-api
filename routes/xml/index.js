@@ -1,10 +1,25 @@
 module.exports = async (fastify, opts) => {
   // define the about route
   fastify.get("/properties", async (request, reply) => {
-    return {
-      data: { token: "accessTokenResp.accessToken" },
-      error: null,
-    };
+    const queryString = `SELECT * from properties limit 3000`;
+    const { rows: props, fields } = await fastify.epDbConn.query(queryString);
+
+    let xml_str =
+      "<?xml version='1.0' encoding='utf-8' standalone='yes'?><root><kyero><feed_version>3</feed_version>";
+
+    props?.forEach((prop) => {
+      xml_str += prop?.xml_data || "";
+    });
+    xml_str += "</kyero></root>";
+
+    xml_str = xml_str.replaceAll("&", "&amp;");
+    xml_str = xml_str.replaceAll('"', "&quot;");
+    xml_str = xml_str.replaceAll(",", "&apos;");
+    xml_str = xml_str.replaceAll("\n", "<br />");
+    // xml_str = xml_str.replaceAll("<", "&lt");
+    // xml_str = xml_str.replaceAll(">", "&gt");
+
+    reply.type("application/xml").send(xml_str);
   });
   // define the about route
   fastify.post("/properties", async (request, reply) => {
