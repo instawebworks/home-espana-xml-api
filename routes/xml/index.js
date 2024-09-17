@@ -1,7 +1,7 @@
 module.exports = async (fastify, opts) => {
   // define the about route
   fastify.get("/properties", async (request, reply) => {
-    const queryString = `SELECT * from properties limit 10`;
+    const queryString = `SELECT * from properties limit 1000`;
     const { rows: props, fields } = await fastify.epDbConn.query(queryString);
 
     let xml_str =
