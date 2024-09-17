@@ -1,7 +1,7 @@
 module.exports = async (fastify, opts) => {
   // define the about route
   fastify.get("/properties", async (request, reply) => {
-    const queryString = `SELECT * from properties limit 1000`;
+    const queryString = `SELECT * from properties limit 100`;
     const { rows: props, fields } = await fastify.epDbConn.query(queryString);
 
     let xml_str =
@@ -13,9 +13,15 @@ module.exports = async (fastify, opts) => {
     xml_str += "</kyero></root>";
 
     xml_str = xml_str.replaceAll("&", "&amp;");
+
     xml_str = xml_str.replaceAll('"', "&quot;");
     xml_str = xml_str.replaceAll(",", "&apos;");
-    xml_str = xml_str.replaceAll("\n", "<br />");
+    // xml_str = xml_str.replaceAll("\n", "<br />");
+    // xml_str = xml_str.replaceAll("\n\r", "");
+    // xml_str = xml_str.replaceAll("\r\n", "");
+    // xml_str = xml_str.replaceAll("\n", "");
+
+    // console.log(xml_str);
     // xml_str = xml_str.replaceAll("<", "&lt");
     // xml_str = xml_str.replaceAll(">", "&gt");
 
