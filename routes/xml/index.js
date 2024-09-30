@@ -3,8 +3,8 @@ module.exports = async (fastify, opts) => {
   fastify.get("/properties", async (request, reply) => {
     var trancate_date = new Date();
     trancate_date.setDate(trancate_date.getDate() - 10);
-
-    const queryString = `SELECT * from properties where status = 'Live' or status = 'live' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}' limit 100 offset 2300`;
+    // limit 100 offset 2300
+    const queryString = `SELECT * from properties where status = 'Live' or status = 'live' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}' `;
 
     const { rows: props, fields } = await fastify.epDbConn.query(queryString);
 
