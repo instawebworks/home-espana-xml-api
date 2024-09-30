@@ -4,7 +4,7 @@ module.exports = async (fastify, opts) => {
     var trancate_date = new Date();
     trancate_date.setDate(trancate_date.getDate() - 10);
 
-    const queryString = `SELECT * from properties where status = 'Live' or status = 'live' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}'`;
+    const queryString = `SELECT * from properties where status = 'Live' or status = 'live' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}' limit 100 offset 2300`;
 
     const { rows: props, fields } = await fastify.epDbConn.query(queryString);
 
@@ -23,7 +23,7 @@ module.exports = async (fastify, opts) => {
     // xml_str = xml_str.replaceAll("\n", "<br />");
     // xml_str = xml_str.replaceAll("\n\r", "");
     // xml_str = xml_str.replaceAll("\r\n", "");
-    // xml_str = xml_str.replaceAll("\n", "");
+    xml_str = xml_str.replaceAll("\n", "");
 
     // console.log(xml_str);
     // xml_str = xml_str.replaceAll("<", "&lt");
