@@ -1,7 +1,7 @@
 module.exports = async (fastify, opts) => {
   // define the about route
-  fastify.get("/properties/:crmid", async (request, reply) => {
-    const crmid = request?.params?.crmid;
+  fastify.get("/properties/:productid", async (request, reply) => {
+    const productid = request?.params?.productid;
     if (!crmid) {
       return {
         error: "No Record ID Provided",
@@ -10,10 +10,10 @@ module.exports = async (fastify, opts) => {
     var trancate_date = new Date();
     trancate_date.setDate(trancate_date.getDate() - 10);
     // limit 100 offset 2300
-    const queryString = `SELECT * from properties where crm_record_id =$1 and  (status = 'Live' or status = 'live' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') `;
+    const queryString = `SELECT * from properties where product_id =$1 and  (status = 'Live' or status = 'live' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') `;
 
     const { rows: props, fields } = await fastify.epDbConn.query(queryString, [
-      crmid,
+      productid,
     ]);
 
     let xml_str =
