@@ -2,6 +2,7 @@ module.exports = async (fastify, opts) => {
   // define the about route
   fastify.get("/properties/:productid", async (request, reply) => {
     const productid = request?.params?.productid;
+
     if (!productid) {
       return {
         error: "No Record ID Provided",
