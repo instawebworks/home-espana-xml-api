@@ -7,10 +7,9 @@ module.exports = async (fastify, opts) => {
         error: "No Record ID Provided",
       };
     }
-    var trancate_date = new Date();
-    trancate_date.setDate(trancate_date.getDate() - 10);
+
     // limit 100 offset 2300
-    const queryString = `SELECT * from properties where product_id =$1 and  (status = 'Live' or status = 'live' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') `;
+    const queryString = `SELECT * from properties where product_id =$1`;
 
     const { rows: props, fields } = await fastify.epDbConn.query(queryString, [
       productid,
