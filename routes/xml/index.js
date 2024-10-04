@@ -43,16 +43,32 @@ module.exports = async (fastify, opts) => {
     var trancate_date = new Date();
     trancate_date.setDate(trancate_date.getDate() - 10);
     // limit 100 offset 2300
-    const queryString = `SELECT * from properties where status = 'Live' or status = 'live' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}' `;
+    const queryString = `SELECT count(*) from properties where status = 'Live' or status = 'live' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}' `;
+    const { rows: totalCount, fields } = await fastify.epDbConn.query(
+      queryString
+    );
+    const rowCount = totalCount?.[0]?.count || 0;
+    const allPromise = [];
+    const perPage = 50;
+    for (let i = 1; i < rowCount; i += perPage) {
+      const queryString = `SELECT xml_data from properties where status = 'Live' or status = 'live' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}' limit ${perPage} offset ${
+        i - 1
+      }`;
 
-    const { rows: props, fields } = await fastify.epDbConn.query(queryString);
-
+      allPromise.push(fastify.epDbConn.query(queryString));
+    }
+    const allData = await Promise.all(allPromise).then((data) => {
+      return data;
+    });
     let xml_str =
       "<?xml version='1.0' encoding='utf-8' standalone='yes'?><root><kyero><feed_version>3</feed_version>";
 
-    props?.forEach((prop) => {
-      xml_str += prop?.xml_data || "";
+    allData.forEach((indvData) => {
+      indvData?.rows?.forEach((prop) => {
+        xml_str += prop?.xml_data || "";
+      });
     });
+
     xml_str += "</kyero></root>";
 
     xml_str = xml_str.replaceAll("&", "&amp;");
