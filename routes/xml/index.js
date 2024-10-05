@@ -43,7 +43,16 @@ module.exports = async (fastify, opts) => {
     var trancate_date = new Date();
     trancate_date.setDate(trancate_date.getDate() - 10);
     // limit 100 offset 2300
-    const queryString = `SELECT count(*) from properties where status = 'Live' or status = 'live' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}' `;
+    const skip_product_ids = [
+      "BVCA.H419",
+      "BVMT.H496",
+      "BVCA.H416",
+      "BVMT.H747",
+    ];
+    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and product_id not in ('${skip_product_ids.join(
+      "','"
+    )}') `;
+
     const { rows: totalCount, fields } = await fastify.epDbConn.query(
       queryString
     );
@@ -51,10 +60,9 @@ module.exports = async (fastify, opts) => {
     const allPromise = [];
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
-      const queryString = `SELECT xml_data from properties where status = 'Live' or status = 'live' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}' limit ${perPage} offset ${
-        i - 1
-      }`;
-
+      const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and product_id not in ('${skip_product_ids.join(
+        "','"
+      )}')  limit ${perPage} offset ${i - 1}`;
       allPromise.push(fastify.epDbConn.query(queryString));
     }
     const allData = await Promise.all(allPromise).then((data) => {
