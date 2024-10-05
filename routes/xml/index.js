@@ -86,7 +86,7 @@ module.exports = async (fastify, opts) => {
     // xml_str = xml_str.replaceAll("\n", "<br />");
     // xml_str = xml_str.replaceAll("\n\r", "");
     // xml_str = xml_str.replaceAll("\r\n", "");
-    xml_str = xml_str.replaceAll("\n", "");
+    // xml_str = xml_str.replaceAll("\n", "");
 
     // console.log(xml_str);
     // xml_str = xml_str.replaceAll("<", "&lt");
