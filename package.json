@@ -37,7 +37,8 @@
     "pino-pretty": "^9.1.1",
     "postgres": "^3.3.1",
     "qs": "^6.11.2",
-    "uuid-apikey": "^1.5.3"
+    "uuid-apikey": "^1.5.3",
+    "xml-js": "^1.6.11"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
