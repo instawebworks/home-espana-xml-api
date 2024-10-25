@@ -1,4 +1,6 @@
 const convert = require("xml-js");
+const xmlProperties = require("./xmlproperties.json");
+const crmJSON = require("./crmjson.json");
 
 module.exports = async (fastify, opts) => {
   // define the about route
@@ -147,49 +149,44 @@ module.exports = async (fastify, opts) => {
     var trancate_date = new Date();
     trancate_date.setDate(trancate_date.getDate() - 10);
     // limit 100 offset 2300
-    const skip_product_ids = [
-      "BVCA.H419",
-      "BVMT.H496",
-      "BVCA.H416",
-      "BVMT.H747",
-    ];
-    const queryString = `SELECT count(*) from properties where crm_json is not null `;
 
-    const { rows: totalCount, fields } = await fastify.epDbConn.query(
-      queryString
-    );
-    const rowCount = totalCount?.[0]?.count || 0;
-    const allPromise = [];
-    const perPage = 50;
-    for (let i = 1; i < rowCount; i += perPage) {
-      const queryString = `SELECT crm_record_id, crm_json, product_id from properties where crm_json is not null  limit ${perPage} offset ${
-        i - 1
-      }`;
-      allPromise.push(fastify.epDbConn.query(queryString));
-    }
-    const allData = await Promise.all(allPromise).then((data) => {
-      return data;
-    });
-    let crmJSON = {};
-    allData.forEach((indvData) => {
-      indvData?.rows?.forEach((prop) => {
-        crmJSON[prop.product_id] = prop.crm_json;
-      });
-    });
+    // const queryString = `SELECT count(*) from properties where crm_json is not null `;
+
+    // const { rows: totalCount, fields } = await fastify.epDbConn.query(
+    //   queryString
+    // );
+    // const rowCount = totalCount?.[0]?.count || 0;
+
+    // const allPromise = [];
+    // const perPage = 50;
+    // for (let i = 1; i < rowCount; i += perPage) {
+    //   const queryString = `SELECT crm_record_id, crm_json, product_id from properties where crm_json is not null  limit ${perPage} offset ${
+    //     i - 1
+    //   }`;
+    //   allPromise.push(fastify.epDbConn.query(queryString));
+    // }
+    // const allData = await Promise.all(allPromise).then((data) => {
+    //   return data;
+    // });
+    // let crmJSON = {};
+    // allData.forEach((indvData) => {
+    //   indvData?.rows?.forEach((prop) => {
+    //     crmJSON[prop.product_id] = prop.crm_json;
+    //   });
+    // });
 
     //get compact xml data
-    const url =
-      "https://admin.homeespana.co.uk/admin.new/feeds/export.asp?key=idPodRiuaZK";
+    // const url =
+    //   "https://admin.homeespana.co.uk/admin.new/feeds/export.asp?key=idPodRiuaZK";
 
-    const response = await fetch(url);
-    const xmlResponse = await response.text();
+    // const response = await fetch(url);
+    // const xmlResponse = await response.text();
 
-    var convertToJSON = convert.xml2json(xmlResponse, {
-      compact: true,
-      spaces: 2,
-    });
-    const xmlProperties = JSON.parse(convertToJSON).root.property;
-    console.log({ xmlProperties });
+    // var convertToJSON = convert.xml2json(xmlResponse, {
+    //   compact: true,
+    //   spaces: 2,
+    // });
+    // const xmlProperties = JSON.parse(convertToJSON).root.property;
 
     const updatedCRMData = [];
 
@@ -219,8 +216,9 @@ module.exports = async (fastify, opts) => {
           });
         }
       });
-      console.log({ property });
+
       //field mapping
+      // XML to ZOho Field Mapping
       const propertyFieldMapping = {
         id: "PID_Old",
         ref: "Internal_Reference",
@@ -280,15 +278,10 @@ module.exports = async (fastify, opts) => {
           valueFromXML = valueFromXML[itm];
         });
         const crmApiKey = propertyFieldMapping[key];
+        console.log({ key, crmApiKey, valueFromXML });
 
         if (!crmApiKey) return;
         if (valueFromXML._text == crmJSON[crmApiKey]) {
-          console.log(
-            "Same",
-            crmApiKey,
-            valueFromXML._text || valueFromXML,
-            crmJSON[crmApiKey]
-          );
           return;
         }
         updatedCRMJSON[crmApiKey] = valueFromXML._text || valueFromXML;
@@ -301,9 +294,10 @@ module.exports = async (fastify, opts) => {
       //handle fatures
       feature?.forEach((itm) => {
         // console.log(itm._text,propertyFieldMapping[itm._text])
+
         const crmApiKey = propertyFieldMapping[itm._text];
+
         // Fitted Kitchen
-        // console.log({crmApiKey,v:itm._text,k:propertyFieldMapping[itm._text]})
         if (!crmApiKey) return;
         const valueFromCRM = crmJSON[crmApiKey];
         let value;
