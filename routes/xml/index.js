@@ -193,7 +193,7 @@ module.exports = async (fastify, opts) => {
     xmlProperties.forEach((xmlJSON) => {
       const property = {};
       const referenceKey = xmlJSON.ref._text;
-      console.log({ referenceKey, xmlJSON });
+      // console.log({ referenceKey, xmlJSON });
       // if (!crmJSON[referenceKey]) return;
       Object.keys(xmlJSON).forEach((parent) => {
         // console.log({parent})
@@ -236,7 +236,6 @@ module.exports = async (fastify, opts) => {
         "energy_rating.emissions": "Emissions",
         "url.en": "Link",
         video_url: "Youtube_Video_Code",
-
         "Communal Pool": "Swimming_Pool",
         "Private Pool": "Swimming_Pool",
         "Communal Garden": "Garden",
@@ -264,6 +263,7 @@ module.exports = async (fastify, opts) => {
         Solarium: "Solarium",
         "Gated Development": "Gated_Development",
         "Disabled acess": "Disabled_acess",
+        "images.image": "Photos",
       };
       // console.log(property["Swimming Pool"])
       const updatedCRMJSON = {};
@@ -286,6 +286,28 @@ module.exports = async (fastify, opts) => {
         }
         updatedCRMJSON[crmApiKey] = valueFromXML._text || valueFromXML;
       });
+
+      //handle images
+      const imageBucket = {};
+      const imagesFromCRM = crmJSON[referenceKey]["Photos"]
+        .split("\n")
+        .map((pic) => pic.split("-")[1].trim());
+      const imagesFromXML = xmlJSON["images"]["image"].map(
+        (img) => img.url._text
+      );
+
+      imagesFromCRM.forEach((imgUrl) => (imageBucket[imgUrl] = imgUrl));
+      imagesFromXML.forEach((imgUrl) => (imageBucket[imgUrl] = imgUrl));
+
+      let updatedImageList = Object.keys(imageBucket)
+        .map(
+          (img, index) =>
+            `${index + 1} - ${img}${
+              index !== Object.keys(imageBucket).length - 1 ? "\n" : ""
+            }`
+        )
+        .join("");
+      updatedCRMJSON[propertyFieldMapping["images.image"]] = updatedImageList;
 
       //convert feature to array
       const feature = [xmlJSON["features"]["feature"] || []].flat();
@@ -376,6 +398,7 @@ module.exports = async (fastify, opts) => {
       });
       updatedCRMData.push(updatedCRMJSON);
       console.log({ updatedCRMJSON });
+      console.log({ property });
     });
     console.log({ updatedCRMData });
     return updatedCRMData;
