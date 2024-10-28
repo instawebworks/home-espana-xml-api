@@ -1,6 +1,7 @@
 const convert = require("xml-js");
 const xmlProperties = require("./xmlproperties.json");
 const crmJSON = require("./crmjson.json");
+const fs = require("fs");
 
 module.exports = async (fastify, opts) => {
   // define the about route
@@ -175,7 +176,9 @@ module.exports = async (fastify, opts) => {
       });
     });
 
-    //get compact xml data
+    // console.log(crmJSON);
+    // get compact xml data
+
     const url =
       "https://admin.homeespana.co.uk/admin.new/feeds/export.asp?key=idPodRiuaZK";
 
@@ -280,31 +283,35 @@ module.exports = async (fastify, opts) => {
         const crmApiKey = propertyFieldMapping[key];
 
         if (!crmApiKey) return;
-        console.log({
-          key,
-          crmApiKey,
-          referenceKey,
-          valueFromXML,
-          crmValue: crmJSON[referenceKey][crmApiKey],
-        });
+        // console.log({
+        //   key,
+        //   crmApiKey,
+        //   referenceKey,
+        //   valueFromXML,
+        //   crmValue: crmJSON[referenceKey][crmApiKey],
+        // });
 
-        if (valueFromXML._text == crmJSON[crmApiKey]) {
-          return;
+        try {
+          if (valueFromXML._text == crmJSON[referenceKey][crmApiKey]) {
+            return;
+          }
+        } catch (err) {
+          console.log(crmApiKey, crmJSON[referenceKey][crmApiKey], err.message);
         }
         updatedCRMJSON[crmApiKey] = valueFromXML._text || valueFromXML;
       });
 
       //handle images
       const imageBucket = {};
-      const imagesFromCRM = crmJSON[referenceKey]["Photos"]
-        .split("\n")
-        .map((pic) => pic.split("-")[1].trim());
-      const imagesFromXML = xmlJSON["images"]["image"].map(
-        (img) => img.url._text
-      );
+      const imagesFromCRM = crmJSON?.[referenceKey]?.["Photos"]
+        ?.split("\n")
+        ?.map((pic) => pic.split("-")[1].trim());
+      const imagesFromXML = [xmlJSON["images"]?.["image"] || []]
+        .flat()
+        .map((img) => img.url._text);
 
-      imagesFromCRM.forEach((imgUrl) => (imageBucket[imgUrl] = imgUrl));
-      imagesFromXML.forEach((imgUrl) => (imageBucket[imgUrl] = imgUrl));
+      imagesFromCRM?.forEach((imgUrl) => (imageBucket[imgUrl] = imgUrl));
+      imagesFromXML?.forEach((imgUrl) => (imageBucket[imgUrl] = imgUrl));
 
       let updatedImageList = Object.keys(imageBucket)
         .map(
@@ -314,6 +321,7 @@ module.exports = async (fastify, opts) => {
             }`
         )
         .join("");
+
       updatedCRMJSON[propertyFieldMapping["images.image"]] = updatedImageList;
 
       //convert feature to array
@@ -398,12 +406,12 @@ module.exports = async (fastify, opts) => {
         }
 
         if (valueFromCRM == value) return;
-        console.log({
-          crmApiKey,
-          referenceKey,
-          valueFromXML: value,
-          crmValue: crmJSON[referenceKey][crmApiKey],
-        });
+        // console.log({
+        //   crmApiKey,
+        //   referenceKey,
+        //   valueFromXML: value,
+        //   crmValue: crmJSON[referenceKey][crmApiKey],
+        // });
         // console.log({crmApiKey,value})
         updatedCRMJSON[crmApiKey] = value;
       });
@@ -411,7 +419,7 @@ module.exports = async (fastify, opts) => {
       // console.log({ updatedCRMJSON });
       // console.log({ property });
     });
-    console.log({ updatedCRMData });
+    // console.log({ updatedCRMData });
     return updatedCRMData;
     reply.type("application/xml").send(xml_str);
   });
@@ -421,7 +429,7 @@ module.exports = async (fastify, opts) => {
     trancate_date.setDate(trancate_date.getDate() - 10);
     // limit 100 offset 2300
 
-    const queryString = `SELECT count(*) from properties where crm_json is not null `;
+    const queryString = `SELECT count(*) from properties where crm_json is not null`;
 
     const { rows: totalCount, fields } = await fastify.epDbConn.query(
       queryString
@@ -446,6 +454,7 @@ module.exports = async (fastify, opts) => {
       });
     });
 
+    // return { [Object.keys(crmJSON)[0]]: Object.values(crmJSON)[0] };
     // get compact xml data
     const url =
       "https://homeespananewbuild.com/wp-load.php?security_key=03640df25fbe2b01&export_id=7&action=get_data";
@@ -458,7 +467,6 @@ module.exports = async (fastify, opts) => {
       spaces: 2,
     });
     const xmlProperties = JSON.parse(convertToJSON).root.property;
-    console.log({ xmlProperties });
 
     const updatedCRMData = [];
 
@@ -550,38 +558,52 @@ module.exports = async (fastify, opts) => {
           valueFromXML = valueFromXML[itm];
         });
         const crmApiKey = propertyFieldMapping[key];
-        console.log({ key, crmApiKey, valueFromXML });
+        console.log({
+          key,
+          crmApiKey,
+          valueFromXML,
+          valueFromCRM: crmJSON?.[referenceKey]?.[crmApiKey],
+        });
 
         if (!crmApiKey) return;
-        if (valueFromXML._text == crmJSON[crmApiKey]) {
-          return;
+
+        try {
+          if (valueFromXML._text == crmJSON?.[referenceKey]?.[crmApiKey]) {
+            return;
+          }
+        } catch (err) {
+          console.log(
+            "ERROR",
+            crmApiKey,
+            crmJSON?.[referenceKey]?.[crmApiKey],
+            err.message
+          );
         }
         updatedCRMJSON[crmApiKey] = valueFromXML._text || valueFromXML;
       });
 
       //handle images
-      if (crmJSON?.[referenceKey]?.["Photos"]) {
-        const imageBucket = {};
-        const imagesFromCRM = crmJSON[referenceKey]?.["Photos"]
-          .split("\n")
-          .map((pic) => pic.split("-")[1].trim());
-        const imagesFromXML = xmlJSON["images"]["image"].map(
-          (img) => img.url._text
-        );
+      const imageBucket = {};
+      const imagesFromCRM = crmJSON?.[referenceKey]?.["Photos"]
+        ?.split("\n")
+        ?.map((pic) => pic.split("-")[1].trim());
+      const imagesFromXML = [xmlJSON["images"]?.["image"] || []]
+        .flat()
+        .map((img) => img.url._text);
 
-        imagesFromCRM.forEach((imgUrl) => (imageBucket[imgUrl] = imgUrl));
-        imagesFromXML.forEach((imgUrl) => (imageBucket[imgUrl] = imgUrl));
+      imagesFromCRM?.forEach((imgUrl) => (imageBucket[imgUrl] = imgUrl));
+      imagesFromXML?.forEach((imgUrl) => (imageBucket[imgUrl] = imgUrl));
 
-        let updatedImageList = Object.keys(imageBucket)
-          .map(
-            (img, index) =>
-              `${index + 1} - ${img}${
-                index !== Object.keys(imageBucket).length - 1 ? "\n" : ""
-              }`
-          )
-          .join("");
-        updatedCRMJSON[propertyFieldMapping["images.image"]] = updatedImageList;
-      }
+      let updatedImageList = Object.keys(imageBucket)
+        .map(
+          (img, index) =>
+            `${index + 1} - ${img}${
+              index !== Object.keys(imageBucket).length - 1 ? "\n" : ""
+            }`
+        )
+        .join("");
+
+      updatedCRMJSON[propertyFieldMapping["images.image"]] = updatedImageList;
       //convert feature to array
       const feature = [xmlJSON["features"]["feature"] || []].flat();
       // console.log("typeof features", [xmlJSON["features"]["feature"]].flat());
@@ -594,7 +616,7 @@ module.exports = async (fastify, opts) => {
 
         // Fitted Kitchen
         if (!crmApiKey) return;
-        const valueFromCRM = crmJSON[crmApiKey];
+        const valueFromCRM = crmJSON[referenceKey][crmApiKey];
         let value;
 
         //Views of Pool
@@ -667,13 +689,13 @@ module.exports = async (fastify, opts) => {
         // console.log({crmApiKey,value})
         updatedCRMJSON[crmApiKey] = value;
 
-        console.log({ crmApiKey, value });
+        // console.log({ crmApiKey, value });
       });
       updatedCRMData.push(updatedCRMJSON);
       // console.log({ updatedCRMJSON });
       // console.log({ property });
     });
-    console.log({ updatedCRMData });
+    // console.log({ updatedCRMData });
     return updatedCRMData;
     reply.type("application/xml").send(xml_str);
   });
