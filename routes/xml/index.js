@@ -562,23 +562,24 @@ module.exports = async (fastify, opts) => {
           key,
           crmApiKey,
           valueFromXML,
-          valueFromCRM: crmJSON?.[referenceKey]?.[crmApiKey],
+          // valueFromCRM: crmJSON?.[referenceKey]?.[crmApiKey],
         });
 
         if (!crmApiKey) return;
 
-        try {
-          if (valueFromXML._text == crmJSON?.[referenceKey]?.[crmApiKey]) {
-            return;
-          }
-        } catch (err) {
-          console.log(
-            "ERROR",
-            crmApiKey,
-            crmJSON?.[referenceKey]?.[crmApiKey],
-            err.message
-          );
-        }
+        // try {
+        //   if (valueFromXML._text == crmJSON?.[referenceKey]?.[crmApiKey]) {
+        //     return;
+        //   }
+        // } catch (err) {
+        //   console.log(
+        //     "ERROR",
+        //     crmApiKey,
+        //     crmJSON?.[referenceKey]?.[crmApiKey],
+        //     err.message
+        //   );
+        // }
+
         updatedCRMJSON[crmApiKey] = valueFromXML._text || valueFromXML;
       });
 
@@ -616,7 +617,7 @@ module.exports = async (fastify, opts) => {
 
         // Fitted Kitchen
         if (!crmApiKey) return;
-        const valueFromCRM = crmJSON[referenceKey][crmApiKey];
+        const valueFromCRM = crmJSON[referenceKey]?.[crmApiKey];
         let value;
 
         //Views of Pool
