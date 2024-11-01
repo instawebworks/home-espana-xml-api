@@ -3,6 +3,87 @@ const xmlProperties = require("./xmlproperties.json");
 const crmJSON = require("./crmjson.json");
 const fs = require("fs");
 
+const propertyFieldMapping = {
+  id: "PID_Old",
+  ref: "Internal_Reference",
+  price: "Price",
+  new_build: "New_Build_Resale",
+  type: "Type_of_Property",
+  town: "Area",
+  province: "Province",
+  beds: "Bedrooms",
+  baths: "Bathrooms",
+  pool: "Swimming_Pool",
+  "surface_area.built": "Size_Build_m2",
+  "surface_area.plot": "Size_Land_m2",
+  "energy_rating.consumption": "Consumptions",
+  "energy_rating.emissions": "Emissions",
+  "url.en": "Link",
+  video_url: "Youtube_Video_Code",
+  "Communal Pool": "Swimming_Pool",
+  "Private Pool": "Swimming_Pool",
+  "Communal Garden": "Garden",
+  "Private Garden": "Garden",
+  "Off Road Parking": "Parking",
+  "Secure Parking": "Parking",
+  "Garage parking": "Parking",
+  Furnished: "Furnished",
+  "Partially Furnished": "Furnished",
+  "Fitted Kitchen": "Fitted_kitchen",
+  "Double Glazing": "Double_glazing",
+  "Views of pool": "Views_of_Pool",
+  Alarm: "Alarm",
+  "Sea View": "Sea_view",
+  "Outdoor Kitchen": "Summer_kitchen",
+  "Separate Accomodation": "Separate_Accomodation",
+  "Open Sea Views": "Property_View",
+  "Valley Views": "Property_View",
+  "Country Views": "Property_View",
+  Heating: "Heating",
+  "Open Fire": "Open_Fire",
+  "Air Conditioning": "Air_Con",
+  Lift: "Lift",
+  Underbuild: "Underbuild",
+  Solarium: "Solarium",
+  "Gated Development": "Gated_Development",
+  "Disabled acess": "Disabled_acess",
+  "images.image": "Photos",
+};
+
+const refQuery1 = [
+  "Furnished",
+  "Partially Furnished",
+  "Fitted kitchen",
+  "Double Glazing",
+  "Views of pool",
+  "Alarm",
+  "Sea views",
+  "Outdoor Kitchen",
+  "Separate Accomodation",
+  "Internet connection",
+  "Heating",
+  "Open Fire",
+  "Air Conditioned",
+  "Lift",
+  "Underbuild",
+  "Solarium",
+  "Gated Development",
+  "Disabled acess",
+];
+
+let tempMap = {
+  "Communal Pool": "Comunnal",
+  "Private Pool": "Private",
+  "Communal Garden": "Comunnal", //Garden
+  "Private Garden": "Private",
+  "Off Road Parking": "Off Road", //Parking
+  "Secure Parking": "Secure",
+  "Garage parking": "Garage",
+  "Open Sea Views": "Open Sea", //Property View
+  "Valley Views": "Valley",
+  "Country Views": "Country",
+};
+
 module.exports = async (fastify, opts) => {
   // define the about route
   fastify.get("/properties/:productid", async (request, reply) => {
@@ -151,6 +232,7 @@ module.exports = async (fastify, opts) => {
     trancate_date.setDate(trancate_date.getDate() - 10);
     // limit 100 offset 2300
 
+    /*
     const queryString = `SELECT count(*) from properties where crm_json is not null `;
 
     const { rows: totalCount, fields } = await fastify.epDbConn.query(
@@ -161,7 +243,7 @@ module.exports = async (fastify, opts) => {
     const allPromise = [];
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
-      const queryString = `SELECT crm_record_id, crm_json, product_id from properties where crm_json is not null  limit ${perPage} offset ${
+      const queryString = `SELECT crm_record_id, crm_json, product_id from properties where  crm_json is not null  limit ${perPage} offset ${
         i - 1
       }`;
       allPromise.push(fastify.epDbConn.query(queryString));
@@ -176,9 +258,11 @@ module.exports = async (fastify, opts) => {
       });
     });
 
+    */
     // console.log(crmJSON);
     // get compact xml data
 
+    /*
     const url =
       "https://admin.homeespana.co.uk/admin.new/feeds/export.asp?key=idPodRiuaZK";
 
@@ -190,9 +274,11 @@ module.exports = async (fastify, opts) => {
       spaces: 2,
     });
     const xmlProperties = JSON.parse(convertToJSON).root.property;
+    */
 
     const updatedCRMData = [];
 
+    let temp = [];
     xmlProperties.forEach((xmlJSON) => {
       const property = {};
       const referenceKey = xmlJSON.ref._text;
@@ -219,56 +305,7 @@ module.exports = async (fastify, opts) => {
           });
         }
       });
-
-      //field mapping
-      // XML to ZOho Field Mapping
-      const propertyFieldMapping = {
-        id: "PID_Old",
-        ref: "Internal_Reference",
-        price: "Price",
-        new_build: "New_Build_Resale",
-        type: "Type_of_Property",
-        town: "Area",
-        province: "Province",
-        beds: "Bedrooms",
-        baths: "Bathrooms",
-        pool: "Swimming_Pool",
-        "surface_area.built": "Size_Build_m2",
-        "surface_area.plot": "Size_Land_m2",
-        "energy_rating.consumption": "Consumptions",
-        "energy_rating.emissions": "Emissions",
-        "url.en": "Link",
-        video_url: "Youtube_Video_Code",
-        "Communal Pool": "Swimming_Pool",
-        "Private Pool": "Swimming_Pool",
-        "Communal Garden": "Garden",
-        "Private Garden": "Garden",
-        "Off Road Parking": "Parking",
-        "Secure Parking": "Parking",
-        "Garage parking": "Parking",
-        Furnished: "Furnished",
-        "Partially Furnished": "Furnished",
-        "Fitted Kitchen": "Fitted_kitchen",
-        "Double Glazing": "Double_glazing",
-        "Views of pool": "Views_of_Pool",
-        Alarm: "Alarm",
-        "Sea View": "Sea_view",
-        "Outdoor Kitchen": "Summer_kitchen",
-        "Separate Accomodation": "Separate_Accomodation",
-        "Open Sea Views": "Property_View",
-        "Valley Views": "Property_View",
-        "Country Views": "Property_View",
-        Heating: "Heating",
-        "Open Fire": "Open_Fire",
-        "Air Conditioning": "Air_Con",
-        Lift: "Lift",
-        Underbuild: "Underbuild",
-        Solarium: "Solarium",
-        "Gated Development": "Gated_Development",
-        "Disabled acess": "Disabled_acess",
-        "images.image": "Photos",
-      };
-      // console.log(property["Swimming Pool"])
+      temp.push(property);
       const updatedCRMJSON = {};
 
       // handle keys except new_build,desc,features,images
@@ -277,19 +314,14 @@ module.exports = async (fastify, opts) => {
         // console.log({keys})
         let valueFromXML = xmlJSON[keys[0]];
 
+        console.log({ valueFromXML, keys });
         keys.slice(1).forEach((itm) => {
           valueFromXML = valueFromXML[itm];
+          console.log({ new: valueFromXML });
         });
         const crmApiKey = propertyFieldMapping[key];
 
         if (!crmApiKey) return;
-        // console.log({
-        //   key,
-        //   crmApiKey,
-        //   referenceKey,
-        //   valueFromXML,
-        //   crmValue: crmJSON[referenceKey][crmApiKey],
-        // });
 
         try {
           if (valueFromXML._text == crmJSON[referenceKey][crmApiKey]) {
@@ -298,7 +330,7 @@ module.exports = async (fastify, opts) => {
         } catch (err) {
           console.log(crmApiKey, crmJSON[referenceKey][crmApiKey], err.message);
         }
-        updatedCRMJSON[crmApiKey] = valueFromXML._text || valueFromXML;
+        updatedCRMJSON[crmApiKey] = valueFromXML?._text || valueFromXML;
       });
 
       //handle images
@@ -310,19 +342,38 @@ module.exports = async (fastify, opts) => {
         .flat()
         .map((img) => img.url._text);
 
-      imagesFromCRM?.forEach((imgUrl) => (imageBucket[imgUrl] = imgUrl));
-      imagesFromXML?.forEach((imgUrl) => (imageBucket[imgUrl] = imgUrl));
+      let crmImageList = [];
 
-      let updatedImageList = Object.keys(imageBucket)
-        .map(
-          (img, index) =>
-            `${index + 1} - ${img}${
-              index !== Object.keys(imageBucket).length - 1 ? "\n" : ""
-            }`
-        )
-        .join("");
+      let xmlImageList = [];
 
-      updatedCRMJSON[propertyFieldMapping["images.image"]] = updatedImageList;
+      imagesFromCRM?.forEach((imgUrl) => {
+        crmImageList.push(imgUrl);
+        imageBucket[imgUrl] = imgUrl;
+      });
+
+      imagesFromXML?.forEach((imgUrl) => {
+        xmlImageList.push(imgUrl);
+        imageBucket[imgUrl] = imgUrl;
+      });
+
+      crmImageList = crmImageList.sort((a, b) => a.localeCompare(b));
+      xmlImageList = xmlImageList.sort((a, b) => a.localeCompare(b));
+
+      console.log({crmImageList, xmlImageList});
+      if (JSON.stringify(crmImageList) == JSON.stringify(xmlImageList)) {
+        console.log("equal");
+      } else {
+        let updatedImageList = Object.keys(imageBucket)
+          .map(
+            (img, index) =>
+              `${index + 1} - ${img}${
+                index !== Object.keys(imageBucket).length - 1 ? "\n" : ""
+              }`
+          )
+          .join("");
+
+        updatedCRMJSON[propertyFieldMapping["images.image"]] = updatedImageList;
+      }
 
       //convert feature to array
       const feature = [xmlJSON["features"]["feature"] || []].flat();
@@ -331,7 +382,6 @@ module.exports = async (fastify, opts) => {
       //handle fatures
       feature?.forEach((itm) => {
         // console.log(itm._text,propertyFieldMapping[itm._text])
-
         const crmApiKey = propertyFieldMapping[itm._text];
 
         // Fitted Kitchen
@@ -341,81 +391,22 @@ module.exports = async (fastify, opts) => {
         let value;
 
         //Views of Pool
-        if (
-          itm._text === "Furnished" ||
-          itm._text === "Partially Furnished" ||
-          itm._text === "Fitted kitchen" ||
-          itm._text === "Double Glazing" ||
-          itm._text === "Views of pool" ||
-          itm._text === "Alarm" ||
-          itm._text === "Sea views" ||
-          itm._text === "Outdoor Kitchen" ||
-          itm._text === "Separate Accomodation" ||
-          itm._text === "Internet connection" ||
-          itm._text === "Heating" ||
-          itm._text === "Open Fire" ||
-          itm._text === "Air Conditioned" ||
-          itm._text === "Lift" ||
-          itm._text === "Underbuild" ||
-          itm._text === "Solarium" ||
-          itm._text === "Gated Development" ||
-          itm._text === "Disabled acess"
-        ) {
+        if (refQuery1.includes(itm?._text)) {
           value = "YES";
         } else {
           value = "NO";
         }
 
-        //Swimming Pool
-        if (itm._text === "Communal Pool") {
-          value = "Comunnal";
-        }
-        if (itm._text === "Private Pool") {
-          value = "Private";
-        }
-
-        //Garden
-        if (itm._text === "Communal Garden") {
-          value = "Comunnal";
-        }
-        if (itm._text === "Private Garden") {
-          value = "Private";
-        }
-
-        //Parking
-        if (itm._text === "Off Road Parking") {
-          value = "Off Road";
-        }
-        if (itm._text === "Secure Parking") {
-          value = "Secure";
-        }
-        if (itm._text === "Garage parking") {
-          value = "Garage";
-        }
-
-        //Property View
-
-        if (itm._text === "Open Sea Views") {
-          value = "Open Sea";
-        }
-        if (itm._text === "Valley Views") {
-          value = "Valley";
-        }
-        if (itm._text === "Country Views") {
-          value = "Country";
-        }
+        value = tempMap?.[itm._text] || value;
 
         if (valueFromCRM == value) return;
-        // console.log({
-        //   crmApiKey,
-        //   referenceKey,
-        //   valueFromXML: value,
-        //   crmValue: crmJSON[referenceKey][crmApiKey],
-        // });
-        // console.log({crmApiKey,value})
         updatedCRMJSON[crmApiKey] = value;
       });
-      updatedCRMData.push(updatedCRMJSON);
+      if (Object.keys(updatedCRMJSON).length > 0) {
+        updatedCRMJSON.id = crmJSON?.[referenceKey]?.["id"];
+        updatedCRMData.push(updatedCRMJSON);
+      }
+
       // console.log({ updatedCRMJSON });
       // console.log({ property });
     });
@@ -497,55 +488,6 @@ module.exports = async (fastify, opts) => {
         }
       });
 
-      //field mapping
-      // XML to ZOho Field Mapping
-      const propertyFieldMapping = {
-        id: "PID_Old",
-        ref: "Internal_Reference",
-        price: "Price",
-        new_build: "New_Build_Resale",
-        type: "Type_of_Property",
-        town: "Area",
-        province: "Province",
-        beds: "Bedrooms",
-        baths: "Bathrooms",
-        pool: "Swimming_Pool",
-        "surface_area.built": "Size_Build_m2",
-        "surface_area.plot": "Size_Land_m2",
-        "energy_rating.consumption": "Consumptions",
-        "energy_rating.emissions": "Emissions",
-        "url.en": "Link",
-        video_url: "Youtube_Video_Code",
-        "Communal Pool": "Swimming_Pool",
-        "Private Pool": "Swimming_Pool",
-        "Communal Garden": "Garden",
-        "Private Garden": "Garden",
-        "Off Road Parking": "Parking",
-        "Secure Parking": "Parking",
-        "Garage parking": "Parking",
-        Furnished: "Furnished",
-        "Partially Furnished": "Furnished",
-        "Fitted Kitchen": "Fitted_kitchen",
-        "Double Glazing": "Double_glazing",
-        "Views of pool": "Views_of_Pool",
-        Alarm: "Alarm",
-        "Sea View": "Sea_view",
-        "Outdoor Kitchen": "Summer_kitchen",
-        "Separate Accomodation": "Separate_Accomodation",
-        "Open Sea Views": "Property_View",
-        "Valley Views": "Property_View",
-        "Country Views": "Property_View",
-        Heating: "Heating",
-        "Open Fire": "Open_Fire",
-        "Air Conditioning": "Air_Con",
-        Lift: "Lift",
-        Underbuild: "Underbuild",
-        Solarium: "Solarium",
-        "Gated Development": "Gated_Development",
-        "Disabled acess": "Disabled_acess",
-        "images.image": "Photos",
-      };
-      // console.log(property["Swimming Pool"])
       const updatedCRMJSON = {};
 
       // handle keys except new_build,desc,features,images
