@@ -146,7 +146,7 @@
     "Salons": null,
     "Notes": null,
     "Separate_Accomodation": null,
-    "Garden": null,
+    "Garden": "some",
     "Modified_Time": "2024-09-30T05:21:35+02:00",
     "Alarm_Code": null,
     "Walk_to_shops": null,
@@ -182,7 +182,7 @@
     "Created_Time": "2024-09-04T19:10:05+02:00",
     "Emissions": "X",
     "Idealista": false,
-    "Bedrooms": 2,
+    "Bedrooms": 5,
     "Zoopla_SCB": false,
     "Created_By": {
       "name": "Home España",

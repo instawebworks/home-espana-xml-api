@@ -3,7 +3,7 @@ const xmlProperties = require("./xmlproperties.json");
 const crmJSON = require("./crmjson.json");
 const fs = require("fs");
 
-const propertyFieldMapping = {
+let propertyFieldMapping = {
   id: "PID_Old",
   ref: "Internal_Reference",
   price: "Price",
@@ -50,7 +50,7 @@ const propertyFieldMapping = {
   "images.image": "Photos",
 };
 
-const refQuery1 = [
+let propertyFeatures = [
   "Furnished",
   "Partially Furnished",
   "Fitted kitchen",
@@ -71,7 +71,9 @@ const refQuery1 = [
   "Disabled acess",
 ];
 
-let tempMap = {
+let currentSituationsOfProperty = ["new_build", "desc", "features", "images"];
+
+let serviceMap = {
   "Communal Pool": "Comunnal",
   "Private Pool": "Private",
   "Communal Garden": "Comunnal", //Garden
@@ -125,6 +127,7 @@ module.exports = async (fastify, opts) => {
 
     reply.type("application/xml").send(xml_str);
   });
+
   fastify.get("/properties", async (request, reply) => {
     var trancate_date = new Date();
     trancate_date.setDate(trancate_date.getDate() - 10);
@@ -278,7 +281,6 @@ module.exports = async (fastify, opts) => {
 
     const updatedCRMData = [];
 
-    let temp = [];
     xmlProperties.forEach((xmlJSON) => {
       const property = {};
       const referenceKey = xmlJSON.ref._text;
@@ -288,10 +290,7 @@ module.exports = async (fastify, opts) => {
         // console.log({parent})
         if (
           typeof xmlJSON[parent] === "object" &&
-          parent !== "new_build" &&
-          parent !== "desc" &&
-          parent !== "features" &&
-          parent !== "images"
+          !currentSituationsOfProperty.includes(parent)
         ) {
           const children = Object.keys(xmlJSON[parent]);
           children.forEach((child) => {
@@ -305,7 +304,6 @@ module.exports = async (fastify, opts) => {
           });
         }
       });
-      temp.push(property);
       const updatedCRMJSON = {};
 
       // handle keys except new_build,desc,features,images
@@ -334,7 +332,6 @@ module.exports = async (fastify, opts) => {
       });
 
       //handle images
-      const imageBucket = {};
       const imagesFromCRM = crmJSON?.[referenceKey]?.["Photos"]
         ?.split("\n")
         ?.map((pic) => pic.split("-")[1].trim());
@@ -348,26 +345,24 @@ module.exports = async (fastify, opts) => {
 
       imagesFromCRM?.forEach((imgUrl) => {
         crmImageList.push(imgUrl);
-        imageBucket[imgUrl] = imgUrl;
       });
 
       imagesFromXML?.forEach((imgUrl) => {
         xmlImageList.push(imgUrl);
-        imageBucket[imgUrl] = imgUrl;
       });
 
       crmImageList = crmImageList.sort((a, b) => a.localeCompare(b));
       xmlImageList = xmlImageList.sort((a, b) => a.localeCompare(b));
 
-      console.log({crmImageList, xmlImageList});
+      // console.log({crmImageList, xmlImageList});
       if (JSON.stringify(crmImageList) == JSON.stringify(xmlImageList)) {
         console.log("equal");
       } else {
-        let updatedImageList = Object.keys(imageBucket)
+        let updatedImageList = xmlImageList
           .map(
             (img, index) =>
               `${index + 1} - ${img}${
-                index !== Object.keys(imageBucket).length - 1 ? "\n" : ""
+                index !== xmlImageList.length - 1 ? "\n" : ""
               }`
           )
           .join("");
@@ -382,22 +377,21 @@ module.exports = async (fastify, opts) => {
       //handle fatures
       feature?.forEach((itm) => {
         // console.log(itm._text,propertyFieldMapping[itm._text])
-        const crmApiKey = propertyFieldMapping[itm._text];
+        const crmApiKey = propertyFieldMapping?.[itm?._text];
 
         // Fitted Kitchen
         if (!crmApiKey) return;
-        const valueFromCRM = crmJSON[referenceKey][crmApiKey];
+        const valueFromCRM = crmJSON?.[referenceKey]?.[crmApiKey];
 
         let value;
 
-        //Views of Pool
-        if (refQuery1.includes(itm?._text)) {
+        if (propertyFeatures.includes(itm?._text)) {
           value = "YES";
         } else {
           value = "NO";
         }
 
-        value = tempMap?.[itm._text] || value;
+        value = serviceMap?.[itm?._text] || value;
 
         if (valueFromCRM == value) return;
         updatedCRMJSON[crmApiKey] = value;
