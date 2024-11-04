@@ -231,24 +231,43 @@ module.exports = async (fastify, opts) => {
 
   // Incoming Feed
   fastify.get("/syncproperties", async (request, reply) => {
-    var trancate_date = new Date();
-    trancate_date.setDate(trancate_date.getDate() - 10);
-    // limit 100 offset 2300
+    // get compact xml data
 
-    /*
-    const queryString = `SELECT count(*) from properties where crm_json is not null `;
+    const accessTokenResp = await fastify.axios(process.env.ACCESS_TOKEN_URL);
+    const accessToken = accessTokenResp?.data?.accessToken || "";
+    if (accessToken == "") {
+      return {
+        data: null,
+        error:
+          "Issue in getting Access Token, please contact with Administrator",
+      };
+    }
 
-    const { rows: totalCount, fields } = await fastify.epDbConn.query(
-      queryString
-    );
-    const rowCount = totalCount?.[0]?.count || 0;
+    const url =
+      "https://admin.homeespana.co.uk/admin.new/feeds/export.asp?key=idPodRiuaZK";
+
+    const response = await fetch(url);
+    const xmlResponse = await response.text();
+
+    var convertToJSON = convert.xml2json(xmlResponse, {
+      compact: true,
+      spaces: 2,
+    });
+    const xmlProperties = JSON.parse(convertToJSON).root.property;
+    let propIds = [];
+    xmlProperties.forEach((indv) => {
+      propIds.push(indv?.ref?._text);
+    });
+
+    const rowCount = propIds.length;
 
     const allPromise = [];
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
-      const queryString = `SELECT crm_record_id, crm_json, product_id from properties where  crm_json is not null  limit ${perPage} offset ${
-        i - 1
-      }`;
+      // console.log(i, "'" + propIds.slice(i - 1, i + 50).join("','") + "'");
+      const queryString = `SELECT crm_record_id, crm_json, product_id from properties where  crm_json is not null and product_id in ('${propIds
+        .slice(i - 1, i + 50)
+        .join("','")}')`;
       allPromise.push(fastify.epDbConn.query(queryString));
     }
     const allData = await Promise.all(allPromise).then((data) => {
@@ -261,27 +280,11 @@ module.exports = async (fastify, opts) => {
       });
     });
 
-    */
-    // console.log(crmJSON);
-    // get compact xml data
+    let updatedCRMData = [];
+    let returnData = [];
 
-    /*
-    const url =
-      "https://admin.homeespana.co.uk/admin.new/feeds/export.asp?key=idPodRiuaZK";
-
-    const response = await fetch(url);
-    const xmlResponse = await response.text();
-
-    var convertToJSON = convert.xml2json(xmlResponse, {
-      compact: true,
-      spaces: 2,
-    });
-    const xmlProperties = JSON.parse(convertToJSON).root.property;
-    */
-
-    const updatedCRMData = [];
-
-    xmlProperties.forEach((xmlJSON) => {
+    for (const xmlJSON of xmlProperties) {
+      // xmlProperties.forEach(async (xmlJSON) => {
       const property = {};
       const referenceKey = xmlJSON.ref._text;
       // console.log({ referenceKey, xmlJSON });
@@ -312,10 +315,10 @@ module.exports = async (fastify, opts) => {
         // console.log({keys})
         let valueFromXML = xmlJSON[keys[0]];
 
-        console.log({ valueFromXML, keys });
+        // console.log({ valueFromXML, keys });
         keys.slice(1).forEach((itm) => {
           valueFromXML = valueFromXML[itm];
-          console.log({ new: valueFromXML });
+          // console.log({ new: valueFromXML });
         });
         const crmApiKey = propertyFieldMapping[key];
 
@@ -326,7 +329,7 @@ module.exports = async (fastify, opts) => {
             return;
           }
         } catch (err) {
-          console.log(crmApiKey, crmJSON[referenceKey][crmApiKey], err.message);
+          // console.log(crmApiKey, crmJSON[referenceKey][crmApiKey], err.message);
         }
         updatedCRMJSON[crmApiKey] = valueFromXML?._text || valueFromXML;
       });
@@ -354,9 +357,7 @@ module.exports = async (fastify, opts) => {
       crmImageList = crmImageList.sort((a, b) => a.localeCompare(b));
       xmlImageList = xmlImageList.sort((a, b) => a.localeCompare(b));
 
-      // console.log({crmImageList, xmlImageList});
       if (JSON.stringify(crmImageList) == JSON.stringify(xmlImageList)) {
-        console.log("equal");
       } else {
         let updatedImageList = xmlImageList
           .map(
@@ -372,11 +373,9 @@ module.exports = async (fastify, opts) => {
 
       //convert feature to array
       const feature = [xmlJSON["features"]["feature"] || []].flat();
-      // console.log("typeof features", [xmlJSON["features"]["feature"]].flat());
 
       //handle fatures
       feature?.forEach((itm) => {
-        // console.log(itm._text,propertyFieldMapping[itm._text])
         const crmApiKey = propertyFieldMapping?.[itm?._text];
 
         // Fitted Kitchen
@@ -397,243 +396,270 @@ module.exports = async (fastify, opts) => {
         updatedCRMJSON[crmApiKey] = value;
       });
       if (Object.keys(updatedCRMJSON).length > 0) {
-        updatedCRMJSON.id = crmJSON?.[referenceKey]?.["id"];
-        updatedCRMData.push(updatedCRMJSON);
+        // updatedCRMJSON.id = crmJSON?.[referenceKey]?.["id"];
+        updatedCRMData.push({
+          Update_Json: JSON.stringify(updatedCRMJSON),
+          Properties: crmJSON?.[referenceKey]?.["id"],
+          XML_Data: convert.json2xml(xmlJSON, {
+            compact: true,
+            spaces: 2,
+          }),
+          Original_JSON: JSON.stringify(crmJSON?.[referenceKey]),
+          Update_Status: "Pending",
+        });
+        if (updatedCRMData.length == 100) {
+          try {
+            const ress = await fastify.axios({
+              url: "https://www.zohoapis.eu/crm/v7/Property_Update_Log",
+              data: { data: updatedCRMData },
+              headers: { Authorization: accessToken },
+              method: "POST",
+            });
+            returnData.push(ress?.data?.data);
+          } catch (error) {
+            console.log({ error });
+          }
+          updatedCRMData = [];
+        }
       }
-
-      // console.log({ updatedCRMJSON });
-      // console.log({ property });
-    });
-    // console.log({ updatedCRMData });
-    return updatedCRMData;
-    reply.type("application/xml").send(xml_str);
-  });
-
-  fastify.get("/syncproperties2", async (request, reply) => {
-    var trancate_date = new Date();
-    trancate_date.setDate(trancate_date.getDate() - 10);
-    // limit 100 offset 2300
-
-    const queryString = `SELECT count(*) from properties where crm_json is not null`;
-
-    const { rows: totalCount, fields } = await fastify.epDbConn.query(
-      queryString
-    );
-    const rowCount = totalCount?.[0]?.count || 0;
-
-    const allPromise = [];
-    const perPage = 50;
-    for (let i = 1; i < rowCount; i += perPage) {
-      const queryString = `SELECT crm_record_id, crm_json, product_id from properties where crm_json is not null  limit ${perPage} offset ${
-        i - 1
-      }`;
-      allPromise.push(fastify.epDbConn.query(queryString));
     }
-    const allData = await Promise.all(allPromise).then((data) => {
-      return data;
-    });
-    let crmJSON = {};
-    allData.forEach((indvData) => {
-      indvData?.rows?.forEach((prop) => {
-        crmJSON[prop.product_id] = prop.crm_json;
-      });
-    });
-
-    // return { [Object.keys(crmJSON)[0]]: Object.values(crmJSON)[0] };
-    // get compact xml data
-    const url =
-      "https://homeespananewbuild.com/wp-load.php?security_key=03640df25fbe2b01&export_id=7&action=get_data";
-
-    const response = await fetch(url);
-    const xmlResponse = await response.text();
-
-    var convertToJSON = convert.xml2json(xmlResponse, {
-      compact: true,
-      spaces: 2,
-    });
-    const xmlProperties = JSON.parse(convertToJSON).root.property;
-
-    const updatedCRMData = [];
-
-    xmlProperties.forEach((xmlJSON) => {
-      const property = {};
-      const referenceKey = xmlJSON.ref._text;
-      // console.log({ referenceKey, xmlJSON });
-      // if (!crmJSON[referenceKey]) return;
-      Object.keys(xmlJSON).forEach((parent) => {
-        // console.log({parent})
-        if (
-          typeof xmlJSON[parent] === "object" &&
-          parent !== "new_build" &&
-          parent !== "desc" &&
-          parent !== "features" &&
-          parent !== "images"
-        ) {
-          const children = Object.keys(xmlJSON[parent]);
-          children.forEach((child) => {
-            if (child !== "_text") {
-              // console.log(`${parent}.${child}`);
-              property[`${parent}.${child}`] = `${parent}.${child}`;
-            } else {
-              property[parent] = parent;
-              // console.log(parent);
-            }
-          });
-        }
-      });
-
-      const updatedCRMJSON = {};
-
-      // handle keys except new_build,desc,features,images
-      Object.keys(property).forEach((key) => {
-        const keys = key.split(".");
-        // console.log({keys})
-        let valueFromXML = xmlJSON[keys[0]];
-
-        keys.slice(1).forEach((itm) => {
-          valueFromXML = valueFromXML[itm];
+    if (updatedCRMData.length > 0) {
+      try {
+        const ress = await fastify.axios({
+          url: "https://www.zohoapis.eu/crm/v7/Property_Update_Log",
+          data: { data: updatedCRMData },
+          headers: { Authorization: accessToken },
+          method: "POST",
         });
-        const crmApiKey = propertyFieldMapping[key];
-        console.log({
-          key,
-          crmApiKey,
-          valueFromXML,
-          // valueFromCRM: crmJSON?.[referenceKey]?.[crmApiKey],
-        });
+        returnData.push(ress?.data?.data);
+      } catch (error) {
+        console.log({ error });
+      }
+    }
 
-        if (!crmApiKey) return;
-
-        // try {
-        //   if (valueFromXML._text == crmJSON?.[referenceKey]?.[crmApiKey]) {
-        //     return;
-        //   }
-        // } catch (err) {
-        //   console.log(
-        //     "ERROR",
-        //     crmApiKey,
-        //     crmJSON?.[referenceKey]?.[crmApiKey],
-        //     err.message
-        //   );
-        // }
-
-        updatedCRMJSON[crmApiKey] = valueFromXML._text || valueFromXML;
-      });
-
-      //handle images
-      const imageBucket = {};
-      const imagesFromCRM = crmJSON?.[referenceKey]?.["Photos"]
-        ?.split("\n")
-        ?.map((pic) => pic.split("-")[1].trim());
-      const imagesFromXML = [xmlJSON["images"]?.["image"] || []]
-        .flat()
-        .map((img) => img.url._text);
-
-      imagesFromCRM?.forEach((imgUrl) => (imageBucket[imgUrl] = imgUrl));
-      imagesFromXML?.forEach((imgUrl) => (imageBucket[imgUrl] = imgUrl));
-
-      let updatedImageList = Object.keys(imageBucket)
-        .map(
-          (img, index) =>
-            `${index + 1} - ${img}${
-              index !== Object.keys(imageBucket).length - 1 ? "\n" : ""
-            }`
-        )
-        .join("");
-
-      updatedCRMJSON[propertyFieldMapping["images.image"]] = updatedImageList;
-      //convert feature to array
-      const feature = [xmlJSON["features"]["feature"] || []].flat();
-      // console.log("typeof features", [xmlJSON["features"]["feature"]].flat());
-
-      //handle fatures
-      feature?.forEach((itm) => {
-        // console.log(itm._text,propertyFieldMapping[itm._text])
-
-        const crmApiKey = propertyFieldMapping[itm._text];
-
-        // Fitted Kitchen
-        if (!crmApiKey) return;
-        const valueFromCRM = crmJSON[referenceKey]?.[crmApiKey];
-        let value;
-
-        //Views of Pool
-        if (
-          itm._text === "Furnished" ||
-          itm._text === "Partially Furnished" ||
-          itm._text === "Fitted kitchen" ||
-          itm._text === "Double Glazing" ||
-          itm._text === "Views of pool" ||
-          itm._text === "Alarm" ||
-          itm._text === "Sea views" ||
-          itm._text === "Outdoor Kitchen" ||
-          itm._text === "Separate Accomodation" ||
-          itm._text === "Internet connection" ||
-          itm._text === "Heating" ||
-          itm._text === "Open Fire" ||
-          itm._text === "Air Conditioned" ||
-          itm._text === "Lift" ||
-          itm._text === "Underbuild" ||
-          itm._text === "Solarium" ||
-          itm._text === "Gated Development" ||
-          itm._text === "Disabled acess"
-        ) {
-          value = "YES";
-        } else {
-          value = "NO";
-        }
-
-        //Swimming Pool
-        if (itm._text === "Communal Pool") {
-          value = "Comunnal";
-        }
-        if (itm._text === "Private Pool") {
-          value = "Private";
-        }
-
-        //Garden
-        if (itm._text === "Communal Garden") {
-          value = "Comunnal";
-        }
-        if (itm._text === "Private Garden") {
-          value = "Private";
-        }
-
-        //Parking
-        if (itm._text === "Off Road Parking") {
-          value = "Off Road";
-        }
-        if (itm._text === "Secure Parking") {
-          value = "Secure";
-        }
-        if (itm._text === "Garage parking") {
-          value = "Garage";
-        }
-
-        //Property View
-
-        if (itm._text === "Open Sea Views") {
-          value = "Open Sea";
-        }
-        if (itm._text === "Valley Views") {
-          value = "Valley";
-        }
-        if (itm._text === "Country Views") {
-          value = "Country";
-        }
-
-        if (valueFromCRM == value) return;
-
-        // console.log({crmApiKey,value})
-        updatedCRMJSON[crmApiKey] = value;
-
-        // console.log({ crmApiKey, value });
-      });
-      updatedCRMData.push(updatedCRMJSON);
-      // console.log({ updatedCRMJSON });
-      // console.log({ property });
-    });
-    // console.log({ updatedCRMData });
-    return updatedCRMData;
-    reply.type("application/xml").send(xml_str);
+    return returnData;
   });
+
+  // fastify.get("/syncproperties2", async (request, reply) => {
+  //   var trancate_date = new Date();
+  //   trancate_date.setDate(trancate_date.getDate() - 10);
+  //   // limit 100 offset 2300
+
+  //   const queryString = `SELECT count(*) from properties where crm_json is not null`;
+
+  //   const { rows: totalCount, fields } = await fastify.epDbConn.query(
+  //     queryString
+  //   );
+  //   const rowCount = totalCount?.[0]?.count || 0;
+
+  //   const allPromise = [];
+  //   const perPage = 50;
+  //   for (let i = 1; i < rowCount; i += perPage) {
+  //     const queryString = `SELECT crm_record_id, crm_json, product_id from properties where crm_json is not null  limit ${perPage} offset ${
+  //       i - 1
+  //     }`;
+  //     allPromise.push(fastify.epDbConn.query(queryString));
+  //   }
+  //   const allData = await Promise.all(allPromise).then((data) => {
+  //     return data;
+  //   });
+  //   let crmJSON = {};
+  //   allData.forEach((indvData) => {
+  //     indvData?.rows?.forEach((prop) => {
+  //       crmJSON[prop.product_id] = prop.crm_json;
+  //     });
+  //   });
+
+  //   // return { [Object.keys(crmJSON)[0]]: Object.values(crmJSON)[0] };
+  //   // get compact xml data
+  //   const url =
+  //     "https://homeespananewbuild.com/wp-load.php?security_key=03640df25fbe2b01&export_id=7&action=get_data";
+
+  //   const response = await fetch(url);
+  //   const xmlResponse = await response.text();
+
+  //   var convertToJSON = convert.xml2json(xmlResponse, {
+  //     compact: true,
+  //     spaces: 2,
+  //   });
+  //   const xmlProperties = JSON.parse(convertToJSON).root.property;
+
+  //   const updatedCRMData = [];
+
+  //   xmlProperties.forEach((xmlJSON) => {
+  //     const property = {};
+  //     const referenceKey = xmlJSON.ref._text;
+  //     // console.log({ referenceKey, xmlJSON });
+  //     // if (!crmJSON[referenceKey]) return;
+  //     Object.keys(xmlJSON).forEach((parent) => {
+  //       // console.log({parent})
+  //       if (
+  //         typeof xmlJSON[parent] === "object" &&
+  //         parent !== "new_build" &&
+  //         parent !== "desc" &&
+  //         parent !== "features" &&
+  //         parent !== "images"
+  //       ) {
+  //         const children = Object.keys(xmlJSON[parent]);
+  //         children.forEach((child) => {
+  //           if (child !== "_text") {
+  //             // console.log(`${parent}.${child}`);
+  //             property[`${parent}.${child}`] = `${parent}.${child}`;
+  //           } else {
+  //             property[parent] = parent;
+  //             // console.log(parent);
+  //           }
+  //         });
+  //       }
+  //     });
+
+  //     const updatedCRMJSON = {};
+
+  //     // handle keys except new_build,desc,features,images
+  //     Object.keys(property).forEach((key) => {
+  //       const keys = key.split(".");
+  //       // console.log({keys})
+  //       let valueFromXML = xmlJSON[keys[0]];
+
+  //       keys.slice(1).forEach((itm) => {
+  //         valueFromXML = valueFromXML[itm];
+  //       });
+  //       const crmApiKey = propertyFieldMapping[key];
+
+  //       if (!crmApiKey) return;
+
+  //       // try {
+  //       //   if (valueFromXML._text == crmJSON?.[referenceKey]?.[crmApiKey]) {
+  //       //     return;
+  //       //   }
+  //       // } catch (err) {
+  //       //   console.log(
+  //       //     "ERROR",
+  //       //     crmApiKey,
+  //       //     crmJSON?.[referenceKey]?.[crmApiKey],
+  //       //     err.message
+  //       //   );
+  //       // }
+
+  //       updatedCRMJSON[crmApiKey] = valueFromXML._text || valueFromXML;
+  //     });
+
+  //     //handle images
+  //     const imageBucket = {};
+  //     const imagesFromCRM = crmJSON?.[referenceKey]?.["Photos"]
+  //       ?.split("\n")
+  //       ?.map((pic) => pic.split("-")[1].trim());
+  //     const imagesFromXML = [xmlJSON["images"]?.["image"] || []]
+  //       .flat()
+  //       .map((img) => img.url._text);
+
+  //     imagesFromCRM?.forEach((imgUrl) => (imageBucket[imgUrl] = imgUrl));
+  //     imagesFromXML?.forEach((imgUrl) => (imageBucket[imgUrl] = imgUrl));
+
+  //     let updatedImageList = Object.keys(imageBucket)
+  //       .map(
+  //         (img, index) =>
+  //           `${index + 1} - ${img}${
+  //             index !== Object.keys(imageBucket).length - 1 ? "\n" : ""
+  //           }`
+  //       )
+  //       .join("");
+
+  //     updatedCRMJSON[propertyFieldMapping["images.image"]] = updatedImageList;
+  //     //convert feature to array
+  //     const feature = [xmlJSON["features"]["feature"] || []].flat();
+  //     // console.log("typeof features", [xmlJSON["features"]["feature"]].flat());
+
+  //     //handle fatures
+
+  //     feature?.forEach((itm) => {
+  //       // console.log(itm._text,propertyFieldMapping[itm._text])
+
+  //       const crmApiKey = propertyFieldMapping[itm._text];
+
+  //       // Fitted Kitchen
+  //       if (!crmApiKey) return;
+  //       const valueFromCRM = crmJSON[referenceKey]?.[crmApiKey];
+  //       let value;
+
+  //       //Views of Pool
+  //       if (
+  //         itm._text === "Furnished" ||
+  //         itm._text === "Partially Furnished" ||
+  //         itm._text === "Fitted kitchen" ||
+  //         itm._text === "Double Glazing" ||
+  //         itm._text === "Views of pool" ||
+  //         itm._text === "Alarm" ||
+  //         itm._text === "Sea views" ||
+  //         itm._text === "Outdoor Kitchen" ||
+  //         itm._text === "Separate Accomodation" ||
+  //         itm._text === "Internet connection" ||
+  //         itm._text === "Heating" ||
+  //         itm._text === "Open Fire" ||
+  //         itm._text === "Air Conditioned" ||
+  //         itm._text === "Lift" ||
+  //         itm._text === "Underbuild" ||
+  //         itm._text === "Solarium" ||
+  //         itm._text === "Gated Development" ||
+  //         itm._text === "Disabled acess"
+  //       ) {
+  //         value = "YES";
+  //       } else {
+  //         value = "NO";
+  //       }
+
+  //       //Swimming Pool
+  //       if (itm._text === "Communal Pool") {
+  //         value = "Comunnal";
+  //       }
+  //       if (itm._text === "Private Pool") {
+  //         value = "Private";
+  //       }
+
+  //       //Garden
+  //       if (itm._text === "Communal Garden") {
+  //         value = "Comunnal";
+  //       }
+  //       if (itm._text === "Private Garden") {
+  //         value = "Private";
+  //       }
+
+  //       //Parking
+  //       if (itm._text === "Off Road Parking") {
+  //         value = "Off Road";
+  //       }
+  //       if (itm._text === "Secure Parking") {
+  //         value = "Secure";
+  //       }
+  //       if (itm._text === "Garage parking") {
+  //         value = "Garage";
+  //       }
+
+  //       //Property View
+
+  //       if (itm._text === "Open Sea Views") {
+  //         value = "Open Sea";
+  //       }
+  //       if (itm._text === "Valley Views") {
+  //         value = "Valley";
+  //       }
+  //       if (itm._text === "Country Views") {
+  //         value = "Country";
+  //       }
+
+  //       if (valueFromCRM == value) return;
+
+  //       // console.log({crmApiKey,value})
+  //       updatedCRMJSON[crmApiKey] = value;
+
+  //       // console.log({ crmApiKey, value });
+  //     });
+  //     updatedCRMData.push(updatedCRMJSON);
+  //     // console.log({ updatedCRMJSON });
+  //     // console.log({ property });
+  //   });
+  //   // console.log({ updatedCRMData });
+  //   return updatedCRMData;
+  //   reply.type("application/xml").send(xml_str);
+  // });
 };
