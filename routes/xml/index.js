@@ -1,6 +1,6 @@
 const convert = require("xml-js");
-const xmlProperties = require("./xmlproperties.json");
-const crmJSON = require("./crmjson.json");
+const xmlProperties = require("../../data/secondsource/xmlProperties.json");
+const crmJSON = require("../../data/secondsource/crmJSON.json");
 const fs = require("fs");
 
 let propertyFieldMapping = {
@@ -52,23 +52,89 @@ let propertyFieldMapping = {
 
 let propertyFeatures = [
   "Furnished",
+  "FURNISHED",
+  "furnished",
   "Partially Furnished",
+  "PARTIALLY FURNISHED",
+  "partially furnished",
   "Fitted kitchen",
+  "FITTED KITCHEN",
+  "fitted kitchen",
   "Double Glazing",
+  "DOUBLE GLAZING",
+  "double glazing",
   "Views of pool",
+  "VIEWS OF POOL",
+  "views of pool",
   "Alarm",
+  "ALARM",
+  "alarm",
   "Sea views",
+  "SEA VIEWS",
+  "sea views",
+  "Sea view",
+  "SEA VIEW",
+  "sea view",
   "Outdoor Kitchen",
+  "OUTDOOR KITCHEN",
+  "outdoor kitchen",
   "Separate Accomodation",
+  "SEPARATE ACCOMODATION",
+  "separate accomodation",
   "Internet connection",
+  "INTERNET CONNECTION",
+  "internet connection",
   "Heating",
+  "HEATING",
+  "heating",
   "Open Fire",
+  "OPEN FIRE",
+  "open fire",
   "Air Conditioned",
+  "AIR CONDITIONED",
+  "air conditioned",
+  "Air Con",
+  "AIR CON",
+  "air con",
   "Lift",
+  "LIFT",
+  "lift",
   "Underbuild",
+  "UNDERBUILD",
+  "underbuild",
   "Solarium",
+  "SOLARIUM",
+  "solarium",
   "Gated Development",
+  "GATED DEVELOPMENT",
+  "gated development",
   "Disabled acess",
+  "DISABLED ACESS",
+  "disabled acess",
+  "Garage",
+  "GARAGE",
+  "garage",
+  "Marble floors",
+  "MARBLE FLOORS",
+  "marble floors",
+  "Summer kitchen",
+  "SUMMER KITCHEN",
+  "summer kitchen",
+  "Electricity",
+  "ELECTRICITY",
+  "electricity",
+  "Water Supply",
+  "WATER SUPPLY",
+  "water supply",
+  "Telephone",
+  "TELEPHONE",
+  "telephone",
+  "Broadband",
+  "BROADBAND",
+  "broadband",
+  "Disabled access",
+  "DISABLED ACCESS",
+  "disabled access",
 ];
 
 let currentSituationsOfProperty = ["new_build", "desc", "features", "images"];
@@ -142,9 +208,8 @@ module.exports = async (fastify, opts) => {
       "','"
     )}') `;
 
-    const { rows: totalCount, fields } = await fastify.epDbConn.query(
-      queryString
-    );
+    const { rows: totalCount, fields } =
+      await fastify.epDbConn.query(queryString);
     const rowCount = totalCount?.[0]?.count || 0;
     const allPromise = [];
     const perPage = 50;
@@ -390,7 +455,7 @@ module.exports = async (fastify, opts) => {
           value = "NO";
         }
 
-        value = serviceMap?.[itm?._text] || value;
+        value = serviceMap?.[itm?._text.toLowerCase()] || value;
 
         if (valueFromCRM == value) return;
         updatedCRMJSON[crmApiKey] = value;
@@ -452,43 +517,43 @@ module.exports = async (fastify, opts) => {
       };
     }
 
-    const url =
-      "https://homeespananewbuild.com/wp-load.php?security_key=03640df25fbe2b01&export_id=7&action=get_data";
+    // const url =
+    //   "https://homeespananewbuild.com/wp-load.php?security_key=03640df25fbe2b01&export_id=7&action=get_data";
 
-    const response = await fetch(url);
-    const xmlResponse = await response.text();
+    // const response = await fetch(url);
+    // const xmlResponse = await response.text();
 
-    var convertToJSON = convert.xml2json(xmlResponse, {
-      compact: true,
-      spaces: 2,
-    });
-    const xmlProperties = JSON.parse(convertToJSON).root.property;
+    // var convertToJSON = convert.xml2json(xmlResponse, {
+    //   compact: true,
+    //   spaces: 2,
+    // });
+    // const xmlProperties = JSON.parse(convertToJSON).root.property;
 
-    let propIds = [];
-    xmlProperties.forEach((indv) => {
-      propIds.push(indv?.ref?._text);
-    });
+    // let propIds = [];
+    // xmlProperties.forEach((indv) => {
+    //   propIds.push(indv?.ref?._text);
+    // });
 
-    const rowCount = propIds.length;
+    // const rowCount = propIds.length;
 
-    const allPromise = [];
-    const perPage = 50;
-    for (let i = 1; i < rowCount; i += perPage) {
-      // console.log(i, "'" + propIds.slice(i - 1, i + 50).join("','") + "'");
-      const queryString = `SELECT crm_record_id, crm_json, product_id from properties where  crm_json is not null and product_id in ('${propIds
-        .slice(i - 1, i + 50)
-        .join("','")}')`;
-      allPromise.push(fastify.epDbConn.query(queryString));
-    }
-    const allData = await Promise.all(allPromise).then((data) => {
-      return data;
-    });
-    let crmJSON = {};
-    allData.forEach((indvData) => {
-      indvData?.rows?.forEach((prop) => {
-        crmJSON[prop.product_id] = prop.crm_json;
-      });
-    });
+    // const allPromise = [];
+    // const perPage = 50;
+    // for (let i = 1; i < rowCount; i += perPage) {
+    //   // console.log(i, "'" + propIds.slice(i - 1, i + 50).join("','") + "'");
+    //   const queryString = `SELECT crm_record_id, crm_json, product_id from properties where  crm_json is not null and product_id in ('${propIds
+    //     .slice(i - 1, i + 50)
+    //     .join("','")}')`;
+    //   allPromise.push(fastify.epDbConn.query(queryString));
+    // }
+    // const allData = await Promise.all(allPromise).then((data) => {
+    //   return data;
+    // });
+    // let crmJSON = {};
+    // allData.forEach((indvData) => {
+    //   indvData?.rows?.forEach((prop) => {
+    //     crmJSON[prop.product_id] = prop.crm_json;
+    //   });
+    // });
 
     let updatedCRMData = [];
     let returnData = [];
@@ -513,6 +578,7 @@ module.exports = async (fastify, opts) => {
           });
         }
       });
+      console.log({ property });
       const updatedCRMJSON = {};
 
       // handle keys except new_build,desc,features,images
@@ -526,6 +592,7 @@ module.exports = async (fastify, opts) => {
           valueFromXML = valueFromXML[itm];
           // console.log({ new: valueFromXML });
         });
+        console.log({ key, valueFromXML });
         const crmApiKey = propertyFieldMapping[key];
 
         if (!crmApiKey) return;
@@ -540,6 +607,7 @@ module.exports = async (fastify, opts) => {
         }
         updatedCRMJSON[crmApiKey] = valueFromXML?._text || valueFromXML;
       });
+      console.log({ updatedCRMJSON });
 
       //handle images
       const imagesFromCRM = crmJSON?.[referenceKey]?.["Photos"]
@@ -580,6 +648,7 @@ module.exports = async (fastify, opts) => {
 
       //convert feature to array
       const feature = [xmlJSON["features"]["feature"] || []].flat();
+      console.log({ feature });
 
       //handle fatures
       feature?.forEach((itm) => {
@@ -588,6 +657,7 @@ module.exports = async (fastify, opts) => {
         // Fitted Kitchen
         if (!crmApiKey) return;
         const valueFromCRM = crmJSON?.[referenceKey]?.[crmApiKey];
+        console.log({ crmApiKey, itm, valueFromCRM });
 
         let value;
 
@@ -598,8 +668,8 @@ module.exports = async (fastify, opts) => {
         }
 
         value = serviceMap?.[itm?._text] || value;
-
-        if (valueFromCRM == value) return;
+        console.log({ value, crmApiKey });
+        // if (valueFromCRM == value) return;
         updatedCRMJSON[crmApiKey] = value;
       });
       if (Object.keys(updatedCRMJSON).length > 0) {
@@ -616,6 +686,7 @@ module.exports = async (fastify, opts) => {
             "</property>",
           Original_JSON: JSON.stringify(crmJSON?.[referenceKey]),
           Update_Status: "Pending",
+          XML_Source: "homeespananewbuild",
         });
         // if (updatedCRMData.length == 100) {
         //   try {
@@ -651,227 +722,4 @@ module.exports = async (fastify, opts) => {
 
     return returnData;
   });
-
-  // fastify.get("/syncproperties2", async (request, reply) => {
-  //   var trancate_date = new Date();
-  //   trancate_date.setDate(trancate_date.getDate() - 10);
-  //   // limit 100 offset 2300
-
-  //   const queryString = `SELECT count(*) from properties where crm_json is not null`;
-
-  //   const { rows: totalCount, fields } = await fastify.epDbConn.query(
-  //     queryString
-  //   );
-  //   const rowCount = totalCount?.[0]?.count || 0;
-
-  //   const allPromise = [];
-  //   const perPage = 50;
-  //   for (let i = 1; i < rowCount; i += perPage) {
-  //     const queryString = `SELECT crm_record_id, crm_json, product_id from properties where crm_json is not null  limit ${perPage} offset ${
-  //       i - 1
-  //     }`;
-  //     allPromise.push(fastify.epDbConn.query(queryString));
-  //   }
-  //   const allData = await Promise.all(allPromise).then((data) => {
-  //     return data;
-  //   });
-  //   let crmJSON = {};
-  //   allData.forEach((indvData) => {
-  //     indvData?.rows?.forEach((prop) => {
-  //       crmJSON[prop.product_id] = prop.crm_json;
-  //     });
-  //   });
-
-  //   // return { [Object.keys(crmJSON)[0]]: Object.values(crmJSON)[0] };
-  //   // get compact xml data
-  //   const url =
-  //     "https://homeespananewbuild.com/wp-load.php?security_key=03640df25fbe2b01&export_id=7&action=get_data";
-
-  //   const response = await fetch(url);
-  //   const xmlResponse = await response.text();
-
-  //   var convertToJSON = convert.xml2json(xmlResponse, {
-  //     compact: true,
-  //     spaces: 2,
-  //   });
-  //   const xmlProperties = JSON.parse(convertToJSON).root.property;
-
-  //   const updatedCRMData = [];
-
-  //   xmlProperties.forEach((xmlJSON) => {
-  //     const property = {};
-  //     const referenceKey = xmlJSON.ref._text;
-  //     // console.log({ referenceKey, xmlJSON });
-  //     // if (!crmJSON[referenceKey]) return;
-  //     Object.keys(xmlJSON).forEach((parent) => {
-  //       // console.log({parent})
-  //       if (
-  //         typeof xmlJSON[parent] === "object" &&
-  //         parent !== "new_build" &&
-  //         parent !== "desc" &&
-  //         parent !== "features" &&
-  //         parent !== "images"
-  //       ) {
-  //         const children = Object.keys(xmlJSON[parent]);
-  //         children.forEach((child) => {
-  //           if (child !== "_text") {
-  //             // console.log(`${parent}.${child}`);
-  //             property[`${parent}.${child}`] = `${parent}.${child}`;
-  //           } else {
-  //             property[parent] = parent;
-  //             // console.log(parent);
-  //           }
-  //         });
-  //       }
-  //     });
-
-  //     const updatedCRMJSON = {};
-
-  //     // handle keys except new_build,desc,features,images
-  //     Object.keys(property).forEach((key) => {
-  //       const keys = key.split(".");
-  //       // console.log({keys})
-  //       let valueFromXML = xmlJSON[keys[0]];
-
-  //       keys.slice(1).forEach((itm) => {
-  //         valueFromXML = valueFromXML[itm];
-  //       });
-  //       const crmApiKey = propertyFieldMapping[key];
-
-  //       if (!crmApiKey) return;
-
-  //       // try {
-  //       //   if (valueFromXML._text == crmJSON?.[referenceKey]?.[crmApiKey]) {
-  //       //     return;
-  //       //   }
-  //       // } catch (err) {
-  //       //   console.log(
-  //       //     "ERROR",
-  //       //     crmApiKey,
-  //       //     crmJSON?.[referenceKey]?.[crmApiKey],
-  //       //     err.message
-  //       //   );
-  //       // }
-
-  //       updatedCRMJSON[crmApiKey] = valueFromXML._text || valueFromXML;
-  //     });
-
-  //     //handle images
-  //     const imageBucket = {};
-  //     const imagesFromCRM = crmJSON?.[referenceKey]?.["Photos"]
-  //       ?.split("\n")
-  //       ?.map((pic) => pic.split("-")[1].trim());
-  //     const imagesFromXML = [xmlJSON["images"]?.["image"] || []]
-  //       .flat()
-  //       .map((img) => img.url._text);
-
-  //     imagesFromCRM?.forEach((imgUrl) => (imageBucket[imgUrl] = imgUrl));
-  //     imagesFromXML?.forEach((imgUrl) => (imageBucket[imgUrl] = imgUrl));
-
-  //     let updatedImageList = Object.keys(imageBucket)
-  //       .map(
-  //         (img, index) =>
-  //           `${index + 1} - ${img}${
-  //             index !== Object.keys(imageBucket).length - 1 ? "\n" : ""
-  //           }`
-  //       )
-  //       .join("");
-
-  //     updatedCRMJSON[propertyFieldMapping["images.image"]] = updatedImageList;
-  //     //convert feature to array
-  //     const feature = [xmlJSON["features"]["feature"] || []].flat();
-  //     // console.log("typeof features", [xmlJSON["features"]["feature"]].flat());
-
-  //     //handle fatures
-
-  //     feature?.forEach((itm) => {
-  //       // console.log(itm._text,propertyFieldMapping[itm._text])
-
-  //       const crmApiKey = propertyFieldMapping[itm._text];
-
-  //       // Fitted Kitchen
-  //       if (!crmApiKey) return;
-  //       const valueFromCRM = crmJSON[referenceKey]?.[crmApiKey];
-  //       let value;
-
-  //       //Views of Pool
-  //       if (
-  //         itm._text === "Furnished" ||
-  //         itm._text === "Partially Furnished" ||
-  //         itm._text === "Fitted kitchen" ||
-  //         itm._text === "Double Glazing" ||
-  //         itm._text === "Views of pool" ||
-  //         itm._text === "Alarm" ||
-  //         itm._text === "Sea views" ||
-  //         itm._text === "Outdoor Kitchen" ||
-  //         itm._text === "Separate Accomodation" ||
-  //         itm._text === "Internet connection" ||
-  //         itm._text === "Heating" ||
-  //         itm._text === "Open Fire" ||
-  //         itm._text === "Air Conditioned" ||
-  //         itm._text === "Lift" ||
-  //         itm._text === "Underbuild" ||
-  //         itm._text === "Solarium" ||
-  //         itm._text === "Gated Development" ||
-  //         itm._text === "Disabled acess"
-  //       ) {
-  //         value = "YES";
-  //       } else {
-  //         value = "NO";
-  //       }
-
-  //       //Swimming Pool
-  //       if (itm._text === "Communal Pool") {
-  //         value = "Comunnal";
-  //       }
-  //       if (itm._text === "Private Pool") {
-  //         value = "Private";
-  //       }
-
-  //       //Garden
-  //       if (itm._text === "Communal Garden") {
-  //         value = "Comunnal";
-  //       }
-  //       if (itm._text === "Private Garden") {
-  //         value = "Private";
-  //       }
-
-  //       //Parking
-  //       if (itm._text === "Off Road Parking") {
-  //         value = "Off Road";
-  //       }
-  //       if (itm._text === "Secure Parking") {
-  //         value = "Secure";
-  //       }
-  //       if (itm._text === "Garage parking") {
-  //         value = "Garage";
-  //       }
-
-  //       //Property View
-
-  //       if (itm._text === "Open Sea Views") {
-  //         value = "Open Sea";
-  //       }
-  //       if (itm._text === "Valley Views") {
-  //         value = "Valley";
-  //       }
-  //       if (itm._text === "Country Views") {
-  //         value = "Country";
-  //       }
-
-  //       if (valueFromCRM == value) return;
-
-  //       // console.log({crmApiKey,value})
-  //       updatedCRMJSON[crmApiKey] = value;
-
-  //       // console.log({ crmApiKey, value });
-  //     });
-  //     updatedCRMData.push(updatedCRMJSON);
-  //     // console.log({ updatedCRMJSON });
-  //     // console.log({ property });
-  //   });
-  //   // console.log({ updatedCRMData });
-  //   return updatedCRMData;
-  //   reply.type("application/xml").send(xml_str);
-  // });
 };

@@ -1,0 +1,205 @@
+[
+  {
+    "id": {
+      "_text": "15054"
+    },
+    "date": {
+      "_text": "2024-03-04 13:53:41"
+    },
+    "ref": {
+      "_text": "HEK17283"
+    },
+    "price_freq": {
+      "_text": "sale"
+    },
+    "new_build": {
+      "_text": "1"
+    },
+    "price": {
+      "_text": "415000"
+    },
+    "status": {},
+    "parent_price_from": {
+      "_text": "0"
+    },
+    "type": {
+      "_text": "Villa"
+    },
+    "property-address": {
+      "_text": "La Finca, Costa Blanca South"
+    },
+    "town": {
+      "_text": "La Finca"
+    },
+    "province": {
+      "_text": "Costa Blanca South"
+    },
+    "longitude": {
+      "_text": "-0.788096"
+    },
+    "latitude": {
+      "_text": "38.066780"
+    },
+    "beds": {
+      "_cdata": "2"
+    },
+    "baths": {
+      "_cdata": "2"
+    },
+    "pool": {
+      "_text": "1"
+    },
+    "terrace": {
+      "_text": "1"
+    },
+    "garden": {
+      "_text": "1"
+    },
+    "parking": {
+      "_text": "1"
+    },
+    "sea-views": {
+      "_text": "0"
+    },
+    "underbuild": {
+      "_text": "0"
+    },
+    "orientation": {},
+    "completion": [
+      {
+        "_text": "1 - 2 Years"
+      },
+      {
+        "_text": "6 - 12 Months"
+      },
+      {
+        "_text": "More than 2 years"
+      }
+    ],
+    "developer": {
+      "_text": "Oriolana Villas"
+    },
+    "development": {},
+    "surface_area": {
+      "built": {
+        "_text": "142"
+      },
+      "plot": {
+        "_text": "176"
+      },
+      "total-size": {}
+    },
+    "url": {
+      "_text": "https://homeespananewbuild.com/property/hek17283-villa-for-sale-in-la-finca/"
+    },
+    "desc": {
+      "_text": "\n\t\t\tThese new build villas in the popular La Finca Golf resort are under construction.\r\nThis particular villa is semi-detached and ready in April of 2025\r\n\r\nThe property has the living area on the ground level, two bedrooms and two bathrooms on the upper level. There is a small basement that can be used as a gym or cinema room. There is also access to a large private roof solarium where you get views and sunshine all day long.\r\n\r\nIncluded in the price is pre-installation of air-conditioning and a 4x2.5m private swimming pool. There is also off-road parking for one car. Please contact us for the latest availability, floor plans and full building specifications.\r\n\r\nLas Finca golf resort is a well-established area with beautiful surroundings and great views of the countryside. It also has a great mixture of all year-round residents and visiting tourists with the Spanish towns of Algorfa and Los Montesinos a short drive away.\t\t\n\t\t"
+    },
+    "features": {
+      "feature": [
+        {
+          "_text": "Double Glazing"
+        },
+        {
+          "_text": "Fitted Kitchen"
+        },
+        {
+          "_text": "Near Sea"
+        },
+        {
+          "_text": "Off Road Parking"
+        },
+        {
+          "_text": "Private Garden"
+        },
+        {
+          "_text": "Private Pool"
+        },
+        {
+          "_text": "Solarium"
+        }
+      ]
+    },
+    "images": {
+      "image": [
+        {
+          "_attributes": {
+            "id": "1"
+          },
+          "url": {
+            "_text": "https://he-images.b-cdn.net/2024/03/8425954.jpg"
+          }
+        },
+        {
+          "_attributes": {
+            "id": "2"
+          },
+          "url": {
+            "_text": "https://he-images.b-cdn.net/2024/03/8425942-1.jpg"
+          }
+        },
+        {
+          "_attributes": {
+            "id": "3"
+          },
+          "url": {
+            "_text": "https://he-images.b-cdn.net/2024/03/8425949-1.jpg"
+          }
+        },
+        {
+          "_attributes": {
+            "id": "4"
+          },
+          "url": {
+            "_text": "https://he-images.b-cdn.net/2024/03/8425950-1.jpg"
+          }
+        },
+        {
+          "_attributes": {
+            "id": "5"
+          },
+          "url": {
+            "_text": "https://he-images.b-cdn.net/2024/03/8425943-1.jpg"
+          }
+        },
+        {
+          "_attributes": {
+            "id": "6"
+          },
+          "url": {
+            "_text": "https://he-images.b-cdn.net/2024/03/8425951-1.jpg"
+          }
+        },
+        {
+          "_attributes": {
+            "id": "7"
+          },
+          "url": {
+            "_text": "https://he-images.b-cdn.net/2024/03/8425952-1.jpg"
+          }
+        },
+        {
+          "_attributes": {
+            "id": "8"
+          },
+          "url": {
+            "_text": "https://he-images.b-cdn.net/2024/03/8425953-1.jpg"
+          }
+        },
+        {
+          "_attributes": {
+            "id": "9"
+          },
+          "url": {
+            "_text": "https://he-images.b-cdn.net/2024/03/8425955-1.jpg"
+          }
+        }
+      ]
+    },
+    "video": {},
+    "video_2": {},
+    "matterport-url": {},
+    "cloudpano-url": {},
+    "floorfy-url": {}
+  }
+]
