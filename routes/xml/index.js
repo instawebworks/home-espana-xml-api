@@ -439,6 +439,218 @@ module.exports = async (fastify, opts) => {
 
     return returnData;
   });
+  fastify.get("/syncpropertiesnew", async (request, reply) => {
+    // get compact xml data
+
+    const accessTokenResp = await fastify.axios(process.env.ACCESS_TOKEN_URL);
+    const accessToken = accessTokenResp?.data?.accessToken || "";
+    if (accessToken == "") {
+      return {
+        data: null,
+        error:
+          "Issue in getting Access Token, please contact with Administrator",
+      };
+    }
+
+    const url =
+      "https://homeespananewbuild.com/wp-load.php?security_key=03640df25fbe2b01&export_id=7&action=get_data";
+
+    const response = await fetch(url);
+    const xmlResponse = await response.text();
+
+    var convertToJSON = convert.xml2json(xmlResponse, {
+      compact: true,
+      spaces: 2,
+    });
+    const xmlProperties = JSON.parse(convertToJSON).root.property;
+
+    let propIds = [];
+    xmlProperties.forEach((indv) => {
+      propIds.push(indv?.ref?._text);
+    });
+
+    const rowCount = propIds.length;
+
+    const allPromise = [];
+    const perPage = 50;
+    for (let i = 1; i < rowCount; i += perPage) {
+      // console.log(i, "'" + propIds.slice(i - 1, i + 50).join("','") + "'");
+      const queryString = `SELECT crm_record_id, crm_json, product_id from properties where  crm_json is not null and product_id in ('${propIds
+        .slice(i - 1, i + 50)
+        .join("','")}')`;
+      allPromise.push(fastify.epDbConn.query(queryString));
+    }
+    const allData = await Promise.all(allPromise).then((data) => {
+      return data;
+    });
+    let crmJSON = {};
+    allData.forEach((indvData) => {
+      indvData?.rows?.forEach((prop) => {
+        crmJSON[prop.product_id] = prop.crm_json;
+      });
+    });
+
+    let updatedCRMData = [];
+    let returnData = [];
+
+    for (const xmlJSON of xmlProperties) {
+      const property = {};
+      const referenceKey = xmlJSON.ref._text;
+      // console.log({ referenceKey, xmlJSON });
+      // if (!crmJSON[referenceKey]) return;
+      Object.keys(xmlJSON).forEach((parent) => {
+        if (
+          typeof xmlJSON[parent] === "object" &&
+          !currentSituationsOfProperty.includes(parent)
+        ) {
+          const children = Object.keys(xmlJSON[parent]);
+          children.forEach((child) => {
+            if (child !== "_text") {
+              property[`${parent}.${child}`] = `${parent}.${child}`;
+            } else {
+              property[parent] = parent;
+            }
+          });
+        }
+      });
+      const updatedCRMJSON = {};
+
+      // handle keys except new_build,desc,features,images
+      Object.keys(property).forEach((key) => {
+        const keys = key.split(".");
+        // console.log({keys})
+        let valueFromXML = xmlJSON[keys[0]];
+
+        // console.log({ valueFromXML, keys });
+        keys.slice(1).forEach((itm) => {
+          valueFromXML = valueFromXML[itm];
+          // console.log({ new: valueFromXML });
+        });
+        const crmApiKey = propertyFieldMapping[key];
+
+        if (!crmApiKey) return;
+
+        try {
+          if (valueFromXML._text == crmJSON[referenceKey][crmApiKey]) {
+            // If Matches Return
+            // return;
+          }
+        } catch (err) {
+          // console.log(crmApiKey, crmJSON[referenceKey][crmApiKey], err.message);
+        }
+        updatedCRMJSON[crmApiKey] = valueFromXML?._text || valueFromXML;
+      });
+
+      //handle images
+      const imagesFromCRM = crmJSON?.[referenceKey]?.["Photos"]
+        ?.split("\n")
+        ?.map((pic) => pic.split("-")[1].trim());
+      const imagesFromXML = [xmlJSON["images"]?.["image"] || []]
+        .flat()
+        .map((img) => img.url._text);
+
+      let crmImageList = [];
+
+      let xmlImageList = [];
+
+      imagesFromCRM?.forEach((imgUrl) => {
+        crmImageList.push(imgUrl);
+      });
+
+      imagesFromXML?.forEach((imgUrl) => {
+        xmlImageList.push(imgUrl);
+      });
+
+      crmImageList = crmImageList.sort((a, b) => a.localeCompare(b));
+      xmlImageList = xmlImageList.sort((a, b) => a.localeCompare(b));
+
+      if (JSON.stringify(crmImageList) == JSON.stringify(xmlImageList)) {
+      } else {
+        let updatedImageList = xmlImageList
+          .map(
+            (img, index) =>
+              `${index + 1} - ${img}${
+                index !== xmlImageList.length - 1 ? "\n" : ""
+              }`
+          )
+          .join("");
+
+        updatedCRMJSON[propertyFieldMapping["images.image"]] = updatedImageList;
+      }
+
+      //convert feature to array
+      const feature = [xmlJSON["features"]["feature"] || []].flat();
+
+      //handle fatures
+      feature?.forEach((itm) => {
+        const crmApiKey = propertyFieldMapping?.[itm?._text];
+
+        // Fitted Kitchen
+        if (!crmApiKey) return;
+        const valueFromCRM = crmJSON?.[referenceKey]?.[crmApiKey];
+
+        let value;
+
+        if (propertyFeatures.includes(itm?._text)) {
+          value = "YES";
+        } else {
+          value = "NO";
+        }
+
+        value = serviceMap?.[itm?._text] || value;
+
+        if (valueFromCRM == value) return;
+        updatedCRMJSON[crmApiKey] = value;
+      });
+      if (Object.keys(updatedCRMJSON).length > 0) {
+        // updatedCRMJSON.id = crmJSON?.[referenceKey]?.["id"];
+        updatedCRMData.push({
+          Update_Json: JSON.stringify(updatedCRMJSON),
+          Properties: crmJSON?.[referenceKey]?.["id"],
+          XML_Data:
+            "<property>" +
+            convert.json2xml(xmlJSON, {
+              compact: true,
+              spaces: 2,
+            }) +
+            "</property>",
+          Original_JSON: JSON.stringify(crmJSON?.[referenceKey]),
+          Update_Status: "Pending",
+        });
+        // if (updatedCRMData.length == 100) {
+        //   try {
+        //     const ress = await fastify.axios({
+        //       url: "https://www.zohoapis.eu/crm/v7/Property_Update_Log",
+        //       data: { data: updatedCRMData },
+        //       headers: { Authorization: accessToken },
+        //       method: "POST",
+        //     });
+        //     returnData.push(ress?.data?.data);
+        //   } catch (error) {
+        //     console.log({ error });
+        //   }
+        //   updatedCRMData = [];
+        // }
+      }
+    }
+    return updatedCRMData;
+
+    // if (updatedCRMData.length > 0) {
+    //   try {
+    //     const ress = await fastify.axios({
+    //       url: "https://www.zohoapis.eu/crm/v7/Property_Update_Log",
+    //       data: { data: updatedCRMData },
+    //       headers: { Authorization: accessToken },
+    //       method: "POST",
+    //     });
+    //     returnData.push(ress?.data?.data);
+    //   } catch (error) {
+    //     console.log({ error });
+    //   }
+    // }
+
+    return returnData;
+  });
 
   // fastify.get("/syncproperties2", async (request, reply) => {
   //   var trancate_date = new Date();
