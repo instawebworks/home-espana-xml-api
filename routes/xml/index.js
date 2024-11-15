@@ -48,6 +48,7 @@ let propertyFieldMapping = {
   "Gated Development": "Gated_Development",
   "Disabled acess": "Disabled_acess",
   "images.image": "Photos",
+  desc: "Full_description",
 };
 
 let propertyFeatures = [
@@ -137,7 +138,7 @@ let propertyFeatures = [
   "disabled access",
 ];
 
-let currentSituationsOfProperty = ["new_build", "desc", "features", "images"];
+let currentSituationsOfProperty = ["new_build", "features", "images"];
 
 let serviceMap = {
   "Communal Pool": "Comunnal",
@@ -208,9 +209,8 @@ module.exports = async (fastify, opts) => {
       "','"
     )}') `;
 
-    const { rows: totalCount, fields } = await fastify.epDbConn.query(
-      queryString
-    );
+    const { rows: totalCount, fields } =
+      await fastify.epDbConn.query(queryString);
     const rowCount = totalCount?.[0]?.count || 0;
     const allPromise = [];
     const perPage = 50;
@@ -473,35 +473,35 @@ module.exports = async (fastify, opts) => {
           Original_JSON: JSON.stringify(crmJSON?.[referenceKey]),
           Update_Status: "Pending",
         });
-        if (updatedCRMData.length == 100) {
-          try {
-            const ress = await fastify.axios({
-              url: "https://www.zohoapis.eu/crm/v7/Property_Update_Log",
-              data: { data: updatedCRMData },
-              headers: { Authorization: accessToken },
-              method: "POST",
-            });
-            returnData.push(ress?.data?.data);
-          } catch (error) {
-            console.log({ error });
-          }
-          updatedCRMData = [];
-        }
+        // if (updatedCRMData.length == 100) {
+        //   try {
+        //     const ress = await fastify.axios({
+        //       url: "https://www.zohoapis.eu/crm/v7/Property_Update_Log",
+        //       data: { data: updatedCRMData },
+        //       headers: { Authorization: accessToken },
+        //       method: "POST",
+        //     });
+        //     returnData.push(ress?.data?.data);
+        //   } catch (error) {
+        //     console.log({ error });
+        //   }
+        //   updatedCRMData = [];
+        // }
       }
     }
-    if (updatedCRMData.length > 0) {
-      try {
-        const ress = await fastify.axios({
-          url: "https://www.zohoapis.eu/crm/v7/Property_Update_Log",
-          data: { data: updatedCRMData },
-          headers: { Authorization: accessToken },
-          method: "POST",
-        });
-        returnData.push(ress?.data?.data);
-      } catch (error) {
-        console.log({ error });
-      }
-    }
+    // if (updatedCRMData.length > 0) {
+    //   try {
+    //     const ress = await fastify.axios({
+    //       url: "https://www.zohoapis.eu/crm/v7/Property_Update_Log",
+    //       data: { data: updatedCRMData },
+    //       headers: { Authorization: accessToken },
+    //       method: "POST",
+    //     });
+    //     returnData.push(ress?.data?.data);
+    //   } catch (error) {
+    //     console.log({ error });
+    //   }
+    // }
 
     return returnData;
   });
