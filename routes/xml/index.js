@@ -33,8 +33,13 @@ let propertyFieldMapping = {
   "Communal Garden": "Garden",
   "Private Garden": "Garden",
   "Off Road Parking": "Parking",
-  "Secure Parking": "Parking",
+  "Secured Parking": "Parking",
+  "Garage Parking": "Parking",
   "Garage parking": "Parking",
+  "completion__1 - 2 Years": "Completion_old",
+  "completion__More than 2 years": "Completion_2_old",
+  developer: "Developer_old",
+  url: "Link",
   Furnished: "Furnished",
   "Partially Furnished": "Furnished",
   "Fitted Kitchen": "Fitted_kitchen",
@@ -156,8 +161,9 @@ let serviceMap = {
   "Communal Garden": "Comunnal", //Garden
   "Private Garden": "Private",
   "Off Road Parking": "Off Road", //Parking
-  "Secure Parking": "Secure",
+  "Secured Parking": "Secure",
   "Garage parking": "Garage",
+  "Garage Parking": "Garage",
   "Open Sea Views": "Open Sea", //Property View
   "Valley Views": "Valley",
   "Country Views": "Country",
@@ -604,11 +610,57 @@ module.exports = async (fastify, opts) => {
           valueFromXML = valueFromXML[itm];
           // console.log({ new: valueFromXML });
         });
-        console.log({ key, valueFromXML });
-        const crmApiKey = propertyFieldMapping[key];
+        console.log({
+          key,
+          valueFromXML,
+          completion:
+            key.split(".")[0] === "completion" &&
+            valueFromXML?._text === "1 - 2 Years",
+        });
+        let crmApiKey = propertyFieldMapping[key];
+
+        // change crmApiKey based on clients requirement (if 1 then value will be Off Road)
+        if (
+          key.split(".")[0] === "completion" &&
+          valueFromXML?._text === "1 - 2 Years"
+        ) {
+          crmApiKey = propertyFieldMapping["completion__1 - 2 Years"];
+        }
+        if (
+          key.split(".")[0] === "completion" &&
+          valueFromXML?._text === "More than 2 years"
+        ) {
+          crmApiKey = propertyFieldMapping["completion__More than 2 years"];
+        }
 
         if (!crmApiKey) return;
 
+        //handle parking based on clients requirement (if 1 then value will be Off Road)
+        if (key === "parking" && valueFromXML?._text === "1") {
+          updatedCRMJSON[crmApiKey] = "Off Road";
+          return;
+        }
+
+        // handle completion based on clients requirement (if 1 then value will be Off Road)
+        // if (
+        //   key.split(".")[0] === "completion" &&
+        //   valueFromXML?._text === "1 - 2 Years"
+        // ) {
+        //   const crmApiKey = propertyFieldMapping["completion__1 - 2 Years"];
+        //   console.log("Completion", crmApiKey);
+        //   updatedCRMJSON[crmApiKey] = "Off Road";
+        //   return;
+        // }
+        // if (
+        //   key.split(".")[0] === "completion" &&
+        //   valueFromXML?._text === "More than 2 years"
+        // ) {
+        //   const crmApiKey =
+        //     propertyFieldMapping["completion__More than 2 years"];
+        //   console.log("Completion", crmApiKey);
+        //   updatedCRMJSON[crmApiKey] = "Off Road";
+        //   return;
+        // }
         try {
           if (valueFromXML._text == crmJSON[referenceKey][crmApiKey]) {
             // If Matches Return
