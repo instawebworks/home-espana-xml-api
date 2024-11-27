@@ -524,53 +524,53 @@ module.exports = async (fastify, opts) => {
   fastify.get("/syncpropertiesnew", async (request, reply) => {
     // get compact xml data
 
-    // const accessTokenResp = await fastify.axios(process.env.ACCESS_TOKEN_URL);
-    // const accessToken = accessTokenResp?.data?.accessToken || "";
-    // if (accessToken == "") {
-    //   return {
-    //     data: null,
-    //     error:
-    //       "Issue in getting Access Token, please contact with Administrator",
-    //   };
-    // }
+    const accessTokenResp = await fastify.axios(process.env.ACCESS_TOKEN_URL);
+    const accessToken = accessTokenResp?.data?.accessToken || "";
+    if (accessToken == "") {
+      return {
+        data: null,
+        error:
+          "Issue in getting Access Token, please contact with Administrator",
+      };
+    }
 
-    // const url =
-    //   "https://homeespananewbuild.com/wp-load.php?security_key=03640df25fbe2b01&export_id=7&action=get_data";
+    const url =
+      "https://homeespananewbuild.com/wp-load.php?security_key=03640df25fbe2b01&export_id=7&action=get_data";
 
-    // const response = await fetch(url);
-    // const xmlResponse = await response.text();
+    const response = await fetch(url);
+    const xmlResponse = await response.text();
 
-    // var convertToJSON = convert.xml2json(xmlResponse, {
-    //   compact: true,
-    //   spaces: 2,
-    // });
-    // const xmlProperties = JSON.parse(convertToJSON).root.property;
+    var convertToJSON = convert.xml2json(xmlResponse, {
+      compact: true,
+      spaces: 2,
+    });
+    const xmlProperties = JSON.parse(convertToJSON).root.property;
 
-    // let propIds = [];
-    // xmlProperties.forEach((indv) => {
-    //   propIds.push(indv?.ref?._text);
-    // });
+    let propIds = [];
+    xmlProperties.forEach((indv) => {
+      propIds.push(indv?.ref?._text);
+    });
 
-    // const rowCount = propIds.length;
+    const rowCount = propIds.length;
 
-    // const allPromise = [];
-    // const perPage = 50;
-    // for (let i = 1; i < rowCount; i += perPage) {
-    //   // console.log(i, "'" + propIds.slice(i - 1, i + 50).join("','") + "'");
-    //   const queryString = `SELECT crm_record_id, crm_json, product_id from properties where  crm_json is not null and product_id in ('${propIds
-    //     .slice(i - 1, i + 50)
-    //     .join("','")}')`;
-    //   allPromise.push(fastify.epDbConn.query(queryString));
-    // }
-    // const allData = await Promise.all(allPromise).then((data) => {
-    //   return data;
-    // });
-    // let crmJSON = {};
-    // allData.forEach((indvData) => {
-    //   indvData?.rows?.forEach((prop) => {
-    //     crmJSON[prop.product_id] = prop.crm_json;
-    //   });
-    // });
+    const allPromise = [];
+    const perPage = 50;
+    for (let i = 1; i < rowCount; i += perPage) {
+      // console.log(i, "'" + propIds.slice(i - 1, i + 50).join("','") + "'");
+      const queryString = `SELECT crm_record_id, crm_json, product_id from properties where  crm_json is not null and product_id in ('${propIds
+        .slice(i - 1, i + 50)
+        .join("','")}')`;
+      allPromise.push(fastify.epDbConn.query(queryString));
+    }
+    const allData = await Promise.all(allPromise).then((data) => {
+      return data;
+    });
+    let crmJSON = {};
+    allData.forEach((indvData) => {
+      indvData?.rows?.forEach((prop) => {
+        crmJSON[prop.product_id] = prop.crm_json;
+      });
+    });
 
     let updatedCRMData = [];
     let returnData = [];
@@ -750,38 +750,38 @@ module.exports = async (fastify, opts) => {
           Update_Status: "Pending",
           XML_Source: "homeespananewbuild",
         });
-        // if (updatedCRMData.length == 100) {
-        //   try {
-        //     const ress = await fastify.axios({
-        //       url: "https://www.zohoapis.eu/crm/v7/Property_Update_Log",
-        //       data: { data: updatedCRMData },
-        //       headers: { Authorization: accessToken },
-        //       method: "POST",
-        //     });
-        //     returnData.push(ress?.data?.data);
-        //   } catch (error) {
-        //     console.log({ error });
-        //   }
-        //   updatedCRMData = [];
-        // }
+        if (updatedCRMData.length == 100) {
+          try {
+            const ress = await fastify.axios({
+              url: "https://www.zohoapis.eu/crm/v7/Property_Update_Log",
+              data: { data: updatedCRMData },
+              headers: { Authorization: accessToken },
+              method: "POST",
+            });
+            returnData.push(ress?.data?.data);
+          } catch (error) {
+            console.log({ error });
+          }
+          updatedCRMData = [];
+        }
       }
     }
 
     // console.log({ updatedCRMData });
 
-    // if (updatedCRMData.length > 0) {
-    //   try {
-    //     const ress = await fastify.axios({
-    //       url: "https://www.zohoapis.eu/crm/v7/Property_Update_Log",
-    //       data: { data: updatedCRMData },
-    //       headers: { Authorization: accessToken },
-    //       method: "POST",
-    //     });
-    //     returnData.push(ress?.data?.data);
-    //   } catch (error) {
-    //     console.log({ error });
-    //   }
-    // }
+    if (updatedCRMData.length > 0) {
+      try {
+        const ress = await fastify.axios({
+          url: "https://www.zohoapis.eu/crm/v7/Property_Update_Log",
+          data: { data: updatedCRMData },
+          headers: { Authorization: accessToken },
+          method: "POST",
+        });
+        returnData.push(ress?.data?.data);
+      } catch (error) {
+        console.log({ error });
+      }
+    }
     console.log({ updatedCRMData });
     return updatedCRMData;
   });
