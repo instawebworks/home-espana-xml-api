@@ -10,7 +10,7 @@ let propertyFieldMapping = {
   new_build: "New_Build_Resale",
   type: "Type_of_Property",
   town: "Area",
-  province: "Province",
+  province: "Region", // Instead of Province
   beds: "Bedrooms",
   baths: "Bathrooms",
   pool: "Swimming_Pool",
@@ -225,9 +225,8 @@ module.exports = async (fastify, opts) => {
       "','"
     )}') `;
 
-    const { rows: totalCount, fields } = await fastify.epDbConn.query(
-      queryString
-    );
+    const { rows: totalCount, fields } =
+      await fastify.epDbConn.query(queryString);
     const rowCount = totalCount?.[0]?.count || 0;
     const allPromise = [];
     const perPage = 50;
