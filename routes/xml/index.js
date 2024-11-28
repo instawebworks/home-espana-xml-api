@@ -19,6 +19,7 @@ let propertyFieldMapping = {
   parking: "Parking",
   "beds._cdata": "Bedrooms",
   "baths._cdata": "Bathrooms",
+  new_build: "New_Build_Resale",
   terrace: "Terraces",
   "Air Conditioning": "Air_Con",
   "Fitted Kitchen": "Fitted_kitchen",
@@ -153,7 +154,7 @@ let propertyFeatures = [
   "disabled access",
 ];
 
-let currentSituationsOfProperty = ["new_build", "features", "images"];
+let currentSituationsOfProperty = ["features", "images"];
 
 let serviceMap = {
   "Communal Pool": "Comunnal",
@@ -225,8 +226,9 @@ module.exports = async (fastify, opts) => {
       "','"
     )}') `;
 
-    const { rows: totalCount, fields } =
-      await fastify.epDbConn.query(queryString);
+    const { rows: totalCount, fields } = await fastify.epDbConn.query(
+      queryString
+    );
     const rowCount = totalCount?.[0]?.count || 0;
     const allPromise = [];
     const perPage = 50;
@@ -609,14 +611,13 @@ module.exports = async (fastify, opts) => {
           valueFromXML = valueFromXML[itm];
           // console.log({ new: valueFromXML });
         });
+        let crmApiKey = propertyFieldMapping[key];
         console.log({
           key,
           valueFromXML,
-          completion:
-            key.split(".")[0] === "completion" &&
-            valueFromXML?._text === "1 - 2 Years",
+          crmApiKey,
+          crmValue: crmJSON[referenceKey][crmApiKey],
         });
-        let crmApiKey = propertyFieldMapping[key];
 
         // "completion__1 - 2 Years": "Completion_old",
         // "completion__More than 2 years": "Completion_2_old",
@@ -636,10 +637,18 @@ module.exports = async (fastify, opts) => {
         }
 
         if (!crmApiKey) return;
-
+        // New_Build_Resale
         //handle parking based on clients requirement (if 1 then value will be Off Road)
         if (key === "parking" && valueFromXML?._text === "1") {
           updatedCRMJSON[crmApiKey] = "Off Road";
+          return;
+        }
+        //handle new_build based on clients requirement (if 1 then value will be New Build)
+        //any other value except 1 wont be included to the updatedCRMJSON
+        if (key === "new_build" && valueFromXML?._text === "1") {
+          updatedCRMJSON[crmApiKey] = "New Build";
+          return;
+        } else if (key === "new_build" && valueFromXML?._text !== "1") {
           return;
         }
 
@@ -717,6 +726,8 @@ module.exports = async (fastify, opts) => {
         // if (valueFromCRM == value) return;
         updatedCRMJSON[crmApiKey] = value;
       });
+      console.log({ updatedCRMJSON });
+
       if (Object.keys(updatedCRMJSON).length > 0) {
         // updatedCRMJSON.id = crmJSON?.[referenceKey]?.["id"];
         updatedCRMData.push({
