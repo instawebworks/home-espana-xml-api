@@ -22,14 +22,9 @@
     "parent_price_from": {
         "_text": "0"
     },
-    "type": [
-        {
-            "_text": "Plot  Build"
-        },
-        {
-            "_text": "Villa"
-        }
-    ],
+    "type":{
+        "_text": "Villa"
+    },
     "property-address": {
         "_text": "Moraira, Costa Blanca North"
     },

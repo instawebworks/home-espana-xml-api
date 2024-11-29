@@ -8,7 +8,9 @@ let propertyFieldMapping = {
   ref: "Internal_Reference",
   price: "Price",
   new_build: "New_Build_Resale",
+  "type.0": "Type_of_Property",
   type: "Type_of_Property",
+  development: "Site_Public_Name",
   town: "Area",
   province: "Region", // Instead of Province
   beds: "Bedrooms",
@@ -548,6 +550,8 @@ module.exports = async (fastify, opts) => {
     });
     const xmlProperties = JSON.parse(convertToJSON).root.property;
 
+    // console.log({ xmlProperties });
+
     let propIds = [];
     xmlProperties.forEach((indv) => {
       propIds.push(indv?.ref?._text);
@@ -580,7 +584,8 @@ module.exports = async (fastify, opts) => {
     for (const xmlJSON of xmlProperties) {
       const property = {};
       const referenceKey = xmlJSON.ref._text;
-      console.log({ referenceKey, xmlJSON });
+
+      console.log({ referenceKey });
       // if (!crmJSON[referenceKey]) return;
       Object.keys(xmlJSON).forEach((parent) => {
         if (
@@ -600,7 +605,7 @@ module.exports = async (fastify, opts) => {
 
       const updatedCRMJSON = {};
 
-      // handle keys except new_build,desc,features,images
+      // handle keys except desc,features,images
       Object.keys(property).forEach((key) => {
         const keys = key.split(".");
         // console.log({keys})
@@ -616,7 +621,7 @@ module.exports = async (fastify, opts) => {
           key,
           valueFromXML,
           crmApiKey,
-          crmValue: crmJSON[referenceKey][crmApiKey],
+          crmValue: crmJSON?.[referenceKey]?.[crmApiKey],
         });
 
         // "completion__1 - 2 Years": "Completion_old",
@@ -650,6 +655,30 @@ module.exports = async (fastify, opts) => {
           return;
         } else if (key === "new_build" && valueFromXML?._text !== "1") {
           return;
+        }
+
+        //handle type.0 (Type_of_Property) based on clients requirement (if 1 then value will be Off Road)
+        if (key === "type.0" || key === "type") {
+          const propertyTypes = [
+            "1st Floor Apartment",
+            "Apartment",
+            "Bungalow",
+            "Commercial",
+            "Ground Floor Apartment",
+            "Land",
+            "Penthouse Apartment",
+            "Studio Apartment",
+            "Townhouse",
+            "Villa",
+          ];
+          // check wheather xml value is found in propertyTypes if fund put it to updatedCRMJSON otherwise do nothing
+          const isFound = propertyTypes.find(
+            (type) => type === valueFromXML?._text
+          );
+          if (!isFound) {
+            return;
+          }
+          updatedCRMJSON[crmApiKey] = valueFromXML?._text;
         }
 
         try {
@@ -702,7 +731,7 @@ module.exports = async (fastify, opts) => {
 
       //convert feature to array
       const feature = [xmlJSON["features"]["feature"] || []].flat();
-      console.log({ feature });
+      // console.log({ feature });
 
       //handle fatures
       feature?.forEach((itm) => {
@@ -722,11 +751,10 @@ module.exports = async (fastify, opts) => {
         }
 
         value = serviceMap?.[itm?._text] || value;
-        console.log({ crmApiKey, xmlVal: itm._text, value });
+        // console.log({ crmApiKey, xmlVal: itm._text, value });
         // if (valueFromCRM == value) return;
         updatedCRMJSON[crmApiKey] = value;
       });
-      console.log({ updatedCRMJSON });
 
       if (Object.keys(updatedCRMJSON).length > 0) {
         // updatedCRMJSON.id = crmJSON?.[referenceKey]?.["id"];
