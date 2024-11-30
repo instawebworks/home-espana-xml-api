@@ -227,9 +227,8 @@ module.exports = async (fastify, opts) => {
       "','"
     )}') `;
 
-    const { rows: totalCount, fields } = await fastify.epDbConn.query(
-      queryString
-    );
+    const { rows: totalCount, fields } =
+      await fastify.epDbConn.query(queryString);
     const rowCount = totalCount?.[0]?.count || 0;
     const allPromise = [];
     const perPage = 50;
@@ -583,7 +582,7 @@ module.exports = async (fastify, opts) => {
     for (const xmlJSON of xmlProperties) {
       const property = {};
       const referenceKey = xmlJSON.ref._text;
-      console.log({ referenceKey, xmlJSON });
+      // console.log({ referenceKey, xmlJSON });
       // if (!crmJSON[referenceKey]) return;
       Object.keys(xmlJSON).forEach((parent) => {
         if (
@@ -615,12 +614,6 @@ module.exports = async (fastify, opts) => {
           // console.log({ new: valueFromXML });
         });
         let crmApiKey = propertyFieldMapping[key];
-        console.log({
-          key,
-          valueFromXML,
-          crmApiKey,
-          crmValue: crmJSON[referenceKey][crmApiKey],
-        });
 
         // "completion__1 - 2 Years": "Completion_old",
         // "completion__More than 2 years": "Completion_2_old",
@@ -753,7 +746,7 @@ module.exports = async (fastify, opts) => {
         // if (valueFromCRM == value) return;
         updatedCRMJSON[crmApiKey] = value;
       });
-      console.log({ updatedCRMJSON });
+      // console.log({ updatedCRMJSON });
 
       if (Object.keys(updatedCRMJSON).length > 0) {
         // updatedCRMJSON.id = crmJSON?.[referenceKey]?.["id"];
