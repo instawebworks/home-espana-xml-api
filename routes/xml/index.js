@@ -209,8 +209,9 @@ module.exports = async (fastify, opts) => {
       "','"
     )}') `;
 
-    const { rows: totalCount, fields } =
-      await fastify.epDbConn.query(queryString);
+    const { rows: totalCount, fields } = await fastify.epDbConn.query(
+      queryString
+    );
     const rowCount = totalCount?.[0]?.count || 0;
     const allPromise = [];
     const perPage = 50;
@@ -593,7 +594,7 @@ module.exports = async (fastify, opts) => {
           valueFromXML = valueFromXML[itm];
           // console.log({ new: valueFromXML });
         });
-        console.log({ key, valueFromXML });
+        // console.log({ key, valueFromXML });
         const crmApiKey = propertyFieldMapping[key];
 
         if (!crmApiKey) return;
@@ -608,7 +609,7 @@ module.exports = async (fastify, opts) => {
         }
         updatedCRMJSON[crmApiKey] = valueFromXML?._text || valueFromXML;
       });
-      console.log({ updatedCRMJSON });
+      // console.log({ updatedCRMJSON });
 
       //handle images
       const imagesFromCRM = crmJSON?.[referenceKey]?.["Photos"]
@@ -649,7 +650,7 @@ module.exports = async (fastify, opts) => {
 
       //convert feature to array
       const feature = [xmlJSON["features"]["feature"] || []].flat();
-      console.log({ feature });
+      // console.log({ feature });
 
       //handle fatures
       feature?.forEach((itm) => {
@@ -658,7 +659,7 @@ module.exports = async (fastify, opts) => {
         // Fitted Kitchen
         if (!crmApiKey) return;
         const valueFromCRM = crmJSON?.[referenceKey]?.[crmApiKey];
-        console.log({ crmApiKey, itm, valueFromCRM });
+        // console.log({ crmApiKey, itm, valueFromCRM });
 
         let value;
 
@@ -669,12 +670,12 @@ module.exports = async (fastify, opts) => {
         }
 
         value = serviceMap?.[itm?._text] || value;
-        console.log({ value, crmApiKey });
+        // console.log({ value, crmApiKey });
         // if (valueFromCRM == value) return;
         updatedCRMJSON[crmApiKey] = value;
       });
       if (Object.keys(updatedCRMJSON).length > 0) {
-        // updatedCRMJSON.id = crmJSON?.[referenceKey]?.["id"];
+        updatedCRMJSON.Status = "Live";
         updatedCRMData.push({
           Update_Json: JSON.stringify(updatedCRMJSON),
           Properties: crmJSON?.[referenceKey]?.["id"],
