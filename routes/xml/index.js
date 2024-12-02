@@ -227,8 +227,9 @@ module.exports = async (fastify, opts) => {
       "','"
     )}') `;
 
-    const { rows: totalCount, fields } =
-      await fastify.epDbConn.query(queryString);
+    const { rows: totalCount, fields } = await fastify.epDbConn.query(
+      queryString
+    );
     const rowCount = totalCount?.[0]?.count || 0;
     const allPromise = [];
     const perPage = 50;
@@ -749,7 +750,7 @@ module.exports = async (fastify, opts) => {
       // console.log({ updatedCRMJSON });
 
       if (Object.keys(updatedCRMJSON).length > 0) {
-        // updatedCRMJSON.id = crmJSON?.[referenceKey]?.["id"];
+        updatedCRMJSON.Status = "Live";
         updatedCRMData.push({
           Update_Json: JSON.stringify(updatedCRMJSON),
           Properties: crmJSON?.[referenceKey]?.["id"],
