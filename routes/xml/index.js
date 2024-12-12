@@ -673,6 +673,14 @@ module.exports = async (fastify, opts) => {
           updatedCRMJSON[crmApiKey] = valueFromXML?._text;
         }
 
+        //if crm key is Area add '- ' before value
+        if (key === "town" && crmApiKey === "Area") {
+          updatedCRMJSON[crmApiKey] =
+            "- " + valueFromXML?._text || valueFromXML;
+
+          return;
+        }
+
         try {
           if (valueFromXML._text == crmJSON[referenceKey][crmApiKey]) {
             // If Matches Return
@@ -731,8 +739,6 @@ module.exports = async (fastify, opts) => {
 
         // Fitted Kitchen
         if (!crmApiKey) return;
-        // const valueFromCRM = crmJSON?.[referenceKey]?.[crmApiKey];
-        // console.log({ crmApiKey, itm, valueFromCRM });
 
         let value;
 
@@ -747,7 +753,7 @@ module.exports = async (fastify, opts) => {
         // if (valueFromCRM == value) return;
         updatedCRMJSON[crmApiKey] = value;
       });
-      // console.log({ updatedCRMJSON });
+      console.log({ updatedCRMJSON });
 
       if (Object.keys(updatedCRMJSON).length > 0) {
         updatedCRMJSON.Status = "Live";
@@ -782,7 +788,7 @@ module.exports = async (fastify, opts) => {
       }
     }
 
-    // console.log({ updatedCRMData });
+    console.log({ updatedCRMData });
 
     if (updatedCRMData.length > 0) {
       try {
@@ -797,7 +803,7 @@ module.exports = async (fastify, opts) => {
         console.log({ error });
       }
     }
-    // console.log({ updatedCRMData });
+    console.log({ updatedCRMData });
     return updatedCRMData;
   });
 };
