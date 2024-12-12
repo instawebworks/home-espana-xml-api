@@ -227,9 +227,8 @@ module.exports = async (fastify, opts) => {
       "','"
     )}') `;
 
-    const { rows: totalCount, fields } = await fastify.epDbConn.query(
-      queryString
-    );
+    const { rows: totalCount, fields } =
+      await fastify.epDbConn.query(queryString);
     const rowCount = totalCount?.[0]?.count || 0;
     const allPromise = [];
     const perPage = 50;
@@ -502,7 +501,7 @@ module.exports = async (fastify, opts) => {
             });
             returnData.push(ress?.data?.data);
           } catch (error) {
-            console.log({ error });
+            // console.log({ error });
           }
           updatedCRMData = [];
         }
@@ -518,7 +517,7 @@ module.exports = async (fastify, opts) => {
         });
         returnData.push(ress?.data?.data);
       } catch (error) {
-        console.log({ error });
+        // console.log({ error });
       }
     }
 
@@ -753,7 +752,7 @@ module.exports = async (fastify, opts) => {
         // if (valueFromCRM == value) return;
         updatedCRMJSON[crmApiKey] = value;
       });
-      console.log({ updatedCRMJSON });
+      // console.log({ updatedCRMJSON });
 
       if (Object.keys(updatedCRMJSON).length > 0) {
         updatedCRMJSON.Status = "Live";
@@ -781,14 +780,14 @@ module.exports = async (fastify, opts) => {
             });
             returnData.push(ress?.data?.data);
           } catch (error) {
-            console.log({ error });
+            // console.log({ error });
           }
           updatedCRMData = [];
         }
       }
     }
 
-    console.log({ updatedCRMData });
+    // console.log({ updatedCRMData });
 
     if (updatedCRMData.length > 0) {
       try {
@@ -800,10 +799,10 @@ module.exports = async (fastify, opts) => {
         });
         returnData.push(ress?.data?.data);
       } catch (error) {
-        console.log({ error });
+        // console.log({ error });
       }
     }
-    console.log({ updatedCRMData });
+    // console.log({ updatedCRMData });
     return updatedCRMData;
   });
 };
