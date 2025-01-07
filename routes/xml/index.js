@@ -227,9 +227,8 @@ module.exports = async (fastify, opts) => {
       "','"
     )}') `;
 
-    const { rows: totalCount, fields } = await fastify.epDbConn.query(
-      queryString
-    );
+    const { rows: totalCount, fields } =
+      await fastify.epDbConn.query(queryString);
     const rowCount = totalCount?.[0]?.count || 0;
     const allPromise = [];
     const perPage = 50;
@@ -825,6 +824,6 @@ module.exports = async (fastify, opts) => {
     }
 
     // console.log({ updatedCRMData });
-    return updatedCRMData;
+    return "updatedCRMData";
   });
 };
