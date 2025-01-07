@@ -2,7 +2,7 @@ const convert = require("xml-js");
 // const xmlProperties = require("./xmlproperties.json");
 // const crmJSON = require("./crmjson.json");
 const fs = require("fs");
-
+const test = false;
 let propertyFieldMapping = {
   id: "PID_Old",
   ref: "Internal_Reference",
@@ -615,6 +615,19 @@ module.exports = async (fastify, opts) => {
         });
         let crmApiKey = propertyFieldMapping[key];
 
+        if (
+          (key === "beds._cdata" || key === "beds") &&
+          Number(valueFromXML?._text || valueFromXML)
+        ) {
+        }
+
+        //if key is beds._cdata (for bedrooms) and the value of it is not number then we need to change the api key
+        if (
+          (key === "beds._cdata" || key === "beds") &&
+          !Number(valueFromXML?._text || valueFromXML)
+        ) {
+          crmApiKey = "Bedroom_Options";
+        }
         // "completion__1 - 2 Years": "Completion_old",
         // "completion__More than 2 years": "Completion_2_old",
 
@@ -631,7 +644,11 @@ module.exports = async (fastify, opts) => {
         ) {
           crmApiKey = propertyFieldMapping["completion__More than 2 years"];
         }
-
+        // console.log({
+        //   key,
+        //   crmApiKey,
+        //   valueFromXML: valueFromXML?._text || valueFromXML,
+        // });
         if (!crmApiKey) return;
         // New_Build_Resale
         //handle parking based on clients requirement (if 1 then value will be Off Road)
@@ -770,38 +787,42 @@ module.exports = async (fastify, opts) => {
           Update_Status: "Pending",
           XML_Source: "homeespananewbuild",
         });
-        if (updatedCRMData.length == 100) {
-          try {
-            const ress = await fastify.axios({
-              url: "https://www.zohoapis.eu/crm/v7/Property_Update_Log",
-              data: { data: updatedCRMData },
-              headers: { Authorization: accessToken },
-              method: "POST",
-            });
-            returnData.push(ress?.data?.data);
-          } catch (error) {
-            // console.log({ error });
+        if (test != true) {
+          if (updatedCRMData.length == 100) {
+            try {
+              const ress = await fastify.axios({
+                url: "https://www.zohoapis.eu/crm/v7/Property_Update_Log",
+                data: { data: updatedCRMData },
+                headers: { Authorization: accessToken },
+                method: "POST",
+              });
+              returnData.push(ress?.data?.data);
+            } catch (error) {
+              // console.log({ error });
+            }
+            updatedCRMData = [];
           }
-          updatedCRMData = [];
         }
       }
     }
 
     // console.log({ updatedCRMData });
-
-    if (updatedCRMData.length > 0) {
-      try {
-        const ress = await fastify.axios({
-          url: "https://www.zohoapis.eu/crm/v7/Property_Update_Log",
-          data: { data: updatedCRMData },
-          headers: { Authorization: accessToken },
-          method: "POST",
-        });
-        returnData.push(ress?.data?.data);
-      } catch (error) {
-        // console.log({ error });
+    if (test != true) {
+      if (updatedCRMData.length > 0) {
+        try {
+          const ress = await fastify.axios({
+            url: "https://www.zohoapis.eu/crm/v7/Property_Update_Log",
+            data: { data: updatedCRMData },
+            headers: { Authorization: accessToken },
+            method: "POST",
+          });
+          returnData.push(ress?.data?.data);
+        } catch (error) {
+          // console.log({ error });
+        }
       }
     }
+
     // console.log({ updatedCRMData });
     return "updatedCRMData";
   });
