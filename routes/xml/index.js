@@ -227,8 +227,9 @@ module.exports = async (fastify, opts) => {
       "','"
     )}') `;
 
-    const { rows: totalCount, fields } =
-      await fastify.epDbConn.query(queryString);
+    const { rows: totalCount, fields } = await fastify.epDbConn.query(
+      queryString
+    );
     const rowCount = totalCount?.[0]?.count || 0;
     const allPromise = [];
     const perPage = 50;
@@ -441,18 +442,19 @@ module.exports = async (fastify, opts) => {
       // crmImageList = crmImageList.sort((a, b) => a.localeCompare(b));
       // xmlImageList = xmlImageList.sort((a, b) => a.localeCompare(b));
 
-      if (JSON.stringify(crmImageList) == JSON.stringify(xmlImageList)) {
-      } else {
-        let updatedImageList = xmlImageList
-          .map(
-            (img, index) =>
-              `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
-              }`
-          )
-          .join("");
+      // if (JSON.stringify(crmImageList) == JSON.stringify(xmlImageList)) {
+      // } else {
+      let updatedImageList = xmlImageList
+        .map(
+          (img, index) =>
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
+            }`
+        )
+        .join("");
 
-        updatedCRMJSON[propertyFieldMapping["images.image"]] = updatedImageList;
-      }
+      updatedCRMJSON[propertyFieldMapping["images.image"]] = updatedImageList;
+      // }
 
       //convert feature to array
       const feature = [xmlJSON["features"]["feature"] || []].flat();
@@ -727,21 +729,22 @@ module.exports = async (fastify, opts) => {
         xmlImageList.push(imgUrl);
       });
 
-      crmImageList = crmImageList.sort((a, b) => a.localeCompare(b));
-      xmlImageList = xmlImageList.sort((a, b) => a.localeCompare(b));
+      // crmImageList = crmImageList.sort((a, b) => a.localeCompare(b));
+      // xmlImageList = xmlImageList.sort((a, b) => a.localeCompare(b));
 
-      if (JSON.stringify(crmImageList) == JSON.stringify(xmlImageList)) {
-      } else {
-        let updatedImageList = xmlImageList
-          .map(
-            (img, index) =>
-              `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
-              }`
-          )
-          .join("");
+      // if (JSON.stringify(crmImageList) == JSON.stringify(xmlImageList)) {
+      // } else {
+      let updatedImageList = xmlImageList
+        .map(
+          (img, index) =>
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
+            }`
+        )
+        .join("");
 
-        updatedCRMJSON[propertyFieldMapping["images.image"]] = updatedImageList;
-      }
+      updatedCRMJSON[propertyFieldMapping["images.image"]] = updatedImageList;
+      // }
 
       //convert feature to array
       const feature = [xmlJSON["features"]["feature"] || []].flat();
