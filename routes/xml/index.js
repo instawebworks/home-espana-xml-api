@@ -227,8 +227,9 @@ module.exports = async (fastify, opts) => {
       "','"
     )}') `;
 
-    const { rows: totalCount, fields } =
-      await fastify.epDbConn.query(queryString);
+    const { rows: totalCount, fields } = await fastify.epDbConn.query(
+      queryString
+    );
     const rowCount = totalCount?.[0]?.count || 0;
     const allPromise = [];
     const perPage = 50;
@@ -446,7 +447,8 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -524,7 +526,6 @@ module.exports = async (fastify, opts) => {
   });
   fastify.get("/syncpropertiesnew", async (request, reply) => {
     // get compact xml data
-
     const accessTokenResp = await fastify.axios(process.env.ACCESS_TOKEN_URL);
     const accessToken = accessTokenResp?.data?.accessToken || "";
     if (accessToken == "") {
@@ -547,7 +548,7 @@ module.exports = async (fastify, opts) => {
     });
     const xmlProperties = JSON.parse(convertToJSON).root.property;
 
-    // console.log({ xmlProperties });
+    console.log({ xmlProperties });
 
     let propIds = [];
     xmlProperties.forEach((indv) => {
@@ -613,6 +614,15 @@ module.exports = async (fastify, opts) => {
           // console.log({ new: valueFromXML });
         });
         let crmApiKey = propertyFieldMapping[key];
+        if (
+          (key === "baths._cdata" || key === "baths") &&
+          typeof (valueFromXML?._text || valueFromXML) === "string"
+        ) {
+          updatedCRMJSON[crmApiKey] = Number(
+            (valueFromXML?._text || valueFromXML).slice(0, 1)
+          );
+          return;
+        }
 
         if (
           (key === "beds._cdata" || key === "beds") &&
@@ -735,7 +745,8 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
