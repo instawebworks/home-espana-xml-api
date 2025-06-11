@@ -614,29 +614,31 @@ module.exports = async (fastify, opts) => {
           // console.log({ new: valueFromXML });
         });
         let crmApiKey = propertyFieldMapping[key];
-        if (
-          (key === "baths._cdata" || key === "baths") &&
-          typeof (valueFromXML?._text || valueFromXML) === "string"
-        ) {
+        if (key === "baths._cdata" || key === "baths") {
           updatedCRMJSON[crmApiKey] = Number(
             (valueFromXML?._text || valueFromXML).slice(0, 1)
           );
+          updatedCRMJSON["Bathroom_Options"] =
+            valueFromXML?._text || valueFromXML;
           return;
         }
 
-        if (
-          (key === "beds._cdata" || key === "beds") &&
-          Number(valueFromXML?._text || valueFromXML)
-        ) {
+        if (key === "beds._cdata" || key === "beds") {
+          updatedCRMJSON[crmApiKey] = Number(
+            (valueFromXML?._text || valueFromXML).slice(0, 1)
+          );
+          updatedCRMJSON["Bedroom_Options	"] =
+            valueFromXML?._text || valueFromXML;
+          return;
         }
 
         //if key is beds._cdata (for bedrooms) and the value of it is not number then we need to change the api key
-        if (
-          (key === "beds._cdata" || key === "beds") &&
-          !Number(valueFromXML?._text || valueFromXML)
-        ) {
-          crmApiKey = "Bedroom_Options";
-        }
+        // if (
+        //   (key === "beds._cdata" || key === "beds") &&
+        //   !Number(valueFromXML?._text || valueFromXML)
+        // ) {
+        //   crmApiKey = "Bedroom_Options";
+        // }
         // "completion__1 - 2 Years": "Completion_old",
         // "completion__More than 2 years": "Completion_2_old",
 
