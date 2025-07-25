@@ -10,6 +10,8 @@ module.exports = fp(async (fastify, opts) => {
    * Database Connection using Supabase
    */
 
+  await fastify.decorate("cacheConn", await new Redis(process.env.CACHE_URL));
+
   await fastify.decorate(
     "epDbConn",
     new Pool({
