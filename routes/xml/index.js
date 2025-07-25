@@ -277,16 +277,16 @@ module.exports = async (fastify, opts) => {
   });
 
   fastify.get("/properties", async (request, reply) => {
-    const cachedXML = await fastify.cacheConn.get("sync_properties");
-    if (cachedXML) {
-      reply.type("application/xml").send(cachedXML);
-      return;
-    }
+    // const cachedXML = await fastify.cacheConn.get("sync_properties");
+    // if (cachedXML) {
+    //   reply.type("application/xml").send(cachedXML);
+    //   return;
+    // }
 
     var trancate_date = new Date();
     trancate_date.setDate(trancate_date.getDate() - 10);
     // limit 100 offset 2300
-    console.log("sss");
+
     const skip_product_ids = [
       "BVCA.H419",
       "BVMT.H496",
