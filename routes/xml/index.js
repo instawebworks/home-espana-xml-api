@@ -618,7 +618,7 @@ module.exports = async (fastify, opts) => {
     });
     const xmlProperties = JSON.parse(convertToJSON).root.property;
 
-    console.log({ xmlProperties });
+    // console.log({ xmlProperties });
 
     let propIds = [];
     xmlProperties.forEach((indv) => {
@@ -910,7 +910,9 @@ module.exports = async (fastify, opts) => {
 
   fastify.get("/syncpropertyportalmarketing", async (request, reply) => {
     // get compact xml data
-    const accessTokenResp = await fastify.axios(process.env.ACCESS_TOKEN_URL);
+    const accessTokenResp = await fastify.axios(
+      process.env.SANDBOX_ACCESS_TOKEN_URL
+    );
     const accessToken = accessTokenResp?.data?.accessToken || "";
     if (accessToken == "") {
       return {
@@ -960,7 +962,7 @@ module.exports = async (fastify, opts) => {
 
     let updatedCRMData = [];
     let returnData = [];
-
+    console.log(xmlProperties.length);
     for (const xmlJSON of xmlProperties) {
       const property = {};
       const referenceKey = xmlJSON.ref._text;
@@ -1163,7 +1165,9 @@ module.exports = async (fastify, opts) => {
         const crmApiKey = propertyFieldMapping?.[itm?._text];
 
         // Fitted Kitchen
-        if (!crmApiKey) return;
+        if (!crmApiKey) {
+          return;
+        }
 
         let value;
 
@@ -1199,13 +1203,13 @@ module.exports = async (fastify, opts) => {
         if (test != true) {
           if (updatedCRMData.length == 100) {
             try {
-              // const ress = await fastify.axios({
-              //   url: "https://www.zohoapis.eu/crm/v7/Property_Update_Log",
-              //   data: { data: updatedCRMData },
-              //   headers: { Authorization: accessToken },
-              //   method: "POST",
-              // });
-              // returnData.push(ress?.data?.data);
+              const ress = await fastify.axios({
+                url: "https://sandbox.zohoapis.eu/crm/v7/Property_Update_Log",
+                data: { data: updatedCRMData },
+                headers: { Authorization: accessToken },
+                method: "POST",
+              });
+              returnData.push(ress?.data?.data);
             } catch (error) {
               // console.log({ error });
             }
@@ -1214,6 +1218,22 @@ module.exports = async (fastify, opts) => {
         }
       }
     }
-    return { updatedCRMData };
+    // console.log(updatedCRMData.length);
+    if (updatedCRMData.length > 0) {
+      try {
+        const ress = await fastify.axios({
+          url: "https://sandbox.zohoapis.eu/crm/v7/Property_Update_Log",
+          data: { data: updatedCRMData },
+          headers: { Authorization: accessToken },
+          method: "POST",
+        });
+        returnData.push(ress?.data?.data);
+      } catch (error) {
+        // console.log({ error });
+      }
+    }
+
+    return returnData;
+    // return { updatedCRMData };
   });
 };
