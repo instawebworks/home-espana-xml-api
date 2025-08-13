@@ -339,6 +339,259 @@ module.exports = async (fastify, opts) => {
     reply.type("application/xml").send(xml_str);
   });
 
+  fastify.get("/ncb/properties", async (request, reply) => {
+    // const cachedXML = await fastify.cacheConn.get("sync_properties");
+    // if (cachedXML) {
+    //   reply.type("application/xml").send(cachedXML);
+    //   return;
+    // }
+
+    var trancate_date = new Date();
+    trancate_date.setDate(trancate_date.getDate() - 10);
+    // limit 100 offset 2300
+
+    const skip_product_ids = [
+      "BVCA.H419",
+      "BVMT.H496",
+      "BVCA.H416",
+      "BVMT.H747",
+    ];
+    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and product_id like 'NCB%' and product_id not in ('${skip_product_ids.join(
+      "','"
+    )}') `;
+
+    const { rows: totalCount, fields } = await fastify.epDbConn.query(
+      queryString
+    );
+    const rowCount = totalCount?.[0]?.count || 0;
+    console.log({ rowCount })
+    const allPromise = [];
+    const perPage = 50;
+    for (let i = 1; i < rowCount; i += perPage) {
+      const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and product_id like 'NCB%' and product_id not in ('${skip_product_ids.join(
+        "','"
+      )}')  limit ${perPage} offset ${i - 1}`;
+      allPromise.push(fastify.epDbConn.query(queryString));
+    }
+    const allData = await Promise.all(allPromise).then((data) => {
+      return data;
+    });
+    let xml_str =
+      "<?xml version='1.0' encoding='utf-8' standalone='yes'?><root><kyero><feed_version>3</feed_version>";
+
+    allData.forEach((indvData) => {
+      indvData?.rows?.forEach((prop) => {
+        xml_str += prop?.xml_data || "";
+      });
+    });
+
+    xml_str += "</kyero></root>";
+
+    xml_str = xml_str.replaceAll("&", "&amp;");
+
+    xml_str = xml_str.replaceAll('"', "&quot;");
+    xml_str = xml_str.replaceAll(",", "&apos;");
+    // xml_str = xml_str.replaceAll("\n", "<br />");
+    // xml_str = xml_str.replaceAll("\n\r", "");
+    // xml_str = xml_str.replaceAll("\r\n", "");
+    // xml_str = xml_str.replaceAll("\n", "");
+
+    // console.log(xml_str);
+    // xml_str = xml_str.replaceAll("<", "&lt");
+    // xml_str = xml_str.replaceAll(">", "&gt");
+
+    reply.type("application/xml").send(xml_str);
+  });
+  fastify.get("/vlc/properties", async (request, reply) => {
+    // const cachedXML = await fastify.cacheConn.get("sync_properties");
+    // if (cachedXML) {
+    //   reply.type("application/xml").send(cachedXML);
+    //   return;
+    // }
+
+    var trancate_date = new Date();
+    trancate_date.setDate(trancate_date.getDate() - 10);
+    // limit 100 offset 2300
+
+    const skip_product_ids = [
+      "BVCA.H419",
+      "BVMT.H496",
+      "BVCA.H416",
+      "BVMT.H747",
+    ];
+    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and product_id like 'VLC%' and product_id not in ('${skip_product_ids.join(
+      "','"
+    )}') `;
+
+    const { rows: totalCount, fields } = await fastify.epDbConn.query(
+      queryString
+    );
+    const rowCount = totalCount?.[0]?.count || 0;
+    console.log({ rowCount })
+    const allPromise = [];
+    const perPage = 50;
+    for (let i = 1; i < rowCount; i += perPage) {
+      const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and product_id like 'VLC%' and product_id not in ('${skip_product_ids.join(
+        "','"
+      )}')  limit ${perPage} offset ${i - 1}`;
+      allPromise.push(fastify.epDbConn.query(queryString));
+    }
+    const allData = await Promise.all(allPromise).then((data) => {
+      return data;
+    });
+    let xml_str =
+      "<?xml version='1.0' encoding='utf-8' standalone='yes'?><root><kyero><feed_version>3</feed_version>";
+
+    allData.forEach((indvData) => {
+      indvData?.rows?.forEach((prop) => {
+        xml_str += prop?.xml_data || "";
+      });
+    });
+
+    xml_str += "</kyero></root>";
+
+    xml_str = xml_str.replaceAll("&", "&amp;");
+
+    xml_str = xml_str.replaceAll('"', "&quot;");
+    xml_str = xml_str.replaceAll(",", "&apos;");
+    // xml_str = xml_str.replaceAll("\n", "<br />");
+    // xml_str = xml_str.replaceAll("\n\r", "");
+    // xml_str = xml_str.replaceAll("\r\n", "");
+    // xml_str = xml_str.replaceAll("\n", "");
+
+    // console.log(xml_str);
+    // xml_str = xml_str.replaceAll("<", "&lt");
+    // xml_str = xml_str.replaceAll(">", "&gt");
+
+    reply.type("application/xml").send(xml_str);
+  });
+  fastify.get("/hemh/properties", async (request, reply) => {
+    // const cachedXML = await fastify.cacheConn.get("sync_properties");
+    // if (cachedXML) {
+    //   reply.type("application/xml").send(cachedXML);
+    //   return;
+    // }
+
+    var trancate_date = new Date();
+    trancate_date.setDate(trancate_date.getDate() - 10);
+    // limit 100 offset 2300
+
+    const skip_product_ids = [
+      "BVCA.H419",
+      "BVMT.H496",
+      "BVCA.H416",
+      "BVMT.H747",
+    ];
+    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and (product_id like 'HE%' or product_id like 'MH%') and product_id not in ('${skip_product_ids.join(
+      "','"
+    )}') `;
+
+    const { rows: totalCount, fields } = await fastify.epDbConn.query(
+      queryString
+    );
+    const rowCount = totalCount?.[0]?.count || 0;
+    console.log({ rowCount })
+    const allPromise = [];
+    const perPage = 50;
+    for (let i = 1; i < rowCount; i += perPage) {
+      const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and (product_id like 'HE%' or product_id like 'MH%') and product_id not in ('${skip_product_ids.join(
+        "','"
+      )}')  limit ${perPage} offset ${i - 1}`;
+      allPromise.push(fastify.epDbConn.query(queryString));
+    }
+    const allData = await Promise.all(allPromise).then((data) => {
+      return data;
+    });
+    let xml_str =
+      "<?xml version='1.0' encoding='utf-8' standalone='yes'?><root><kyero><feed_version>3</feed_version>";
+
+    allData.forEach((indvData) => {
+      indvData?.rows?.forEach((prop) => {
+        xml_str += prop?.xml_data || "";
+      });
+    });
+
+    xml_str += "</kyero></root>";
+
+    xml_str = xml_str.replaceAll("&", "&amp;");
+
+    xml_str = xml_str.replaceAll('"', "&quot;");
+    xml_str = xml_str.replaceAll(",", "&apos;");
+    // xml_str = xml_str.replaceAll("\n", "<br />");
+    // xml_str = xml_str.replaceAll("\n\r", "");
+    // xml_str = xml_str.replaceAll("\r\n", "");
+    // xml_str = xml_str.replaceAll("\n", "");
+
+    // console.log(xml_str);
+    // xml_str = xml_str.replaceAll("<", "&lt");
+    // xml_str = xml_str.replaceAll(">", "&gt");
+
+    reply.type("application/xml").send(xml_str);
+  });
+  fastify.get("/k/properties", async (request, reply) => {
+    // const cachedXML = await fastify.cacheConn.get("sync_properties");
+    // if (cachedXML) {
+    //   reply.type("application/xml").send(cachedXML);
+    //   return;
+    // }
+
+    var trancate_date = new Date();
+    trancate_date.setDate(trancate_date.getDate() - 10);
+    // limit 100 offset 2300
+
+    const skip_product_ids = [
+      "BVCA.H419",
+      "BVMT.H496",
+      "BVCA.H416",
+      "BVMT.H747",
+    ];
+    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and product_id like '%K%' and product_id not in ('${skip_product_ids.join(
+      "','"
+    )}') `;
+
+    const { rows: totalCount, fields } = await fastify.epDbConn.query(
+      queryString
+    );
+    const rowCount = totalCount?.[0]?.count || 0;
+    console.log({ rowCount })
+    const allPromise = [];
+    const perPage = 50;
+    for (let i = 1; i < rowCount; i += perPage) {
+      const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and product_id like '%K%' and product_id not in ('${skip_product_ids.join(
+        "','"
+      )}')  limit ${perPage} offset ${i - 1}`;
+      allPromise.push(fastify.epDbConn.query(queryString));
+    }
+    const allData = await Promise.all(allPromise).then((data) => {
+      return data;
+    });
+    let xml_str =
+      "<?xml version='1.0' encoding='utf-8' standalone='yes'?><root><kyero><feed_version>3</feed_version>";
+
+    allData.forEach((indvData) => {
+      indvData?.rows?.forEach((prop) => {
+        xml_str += prop?.xml_data || "";
+      });
+    });
+
+    xml_str += "</kyero></root>";
+
+    xml_str = xml_str.replaceAll("&", "&amp;");
+
+    xml_str = xml_str.replaceAll('"', "&quot;");
+    xml_str = xml_str.replaceAll(",", "&apos;");
+    // xml_str = xml_str.replaceAll("\n", "<br />");
+    // xml_str = xml_str.replaceAll("\n\r", "");
+    // xml_str = xml_str.replaceAll("\r\n", "");
+    // xml_str = xml_str.replaceAll("\n", "");
+
+    // console.log(xml_str);
+    // xml_str = xml_str.replaceAll("<", "&lt");
+    // xml_str = xml_str.replaceAll(">", "&gt");
+
+    reply.type("application/xml").send(xml_str);
+  });
+
   // define the about route
   fastify.post("/properties", async (request, reply) => {
     //* Check org_id in query/params/body
@@ -517,8 +770,7 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${
-              index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -817,8 +1069,7 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${
-              index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1147,8 +1398,7 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${
-              index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
