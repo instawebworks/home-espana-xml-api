@@ -611,7 +611,7 @@ module.exports = async (fastify, opts) => {
           region
         } = property;
         insert_properties.push(
-          `($${++count},$${++count},$${++count},$${++count},$${++count},$${++count}),$${++count})`
+          `($${++count},$${++count},$${++count},$${++count},$${++count},$${++count},$${++count})`
         );
         datas.push(crm_record_id);
         datas.push(status);
@@ -625,7 +625,7 @@ module.exports = async (fastify, opts) => {
       const queryString = `INSERT INTO properties (crm_record_id, status, product_id, modified_time, crm_json, xml_data, region ) values ${insert_properties.join(
         ","
       )} ON CONFLICT (crm_record_id) DO UPDATE SET xml_data = excluded.xml_data, status = excluded.status, product_id = excluded.product_id, crm_json = excluded.crm_json `;
-
+      // console.log({ queryString })
       const { rows: props, fields } = await fastify.epDbConn.query(
         queryString,
         datas
