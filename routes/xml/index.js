@@ -356,7 +356,7 @@ module.exports = async (fastify, opts) => {
       "BVCA.H416",
       "BVMT.H747",
     ];
-    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and product_id like 'NCB%' and product_id not in ('${skip_product_ids.join(
+    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and (product_id like 'NCB%' or region = 'COSTA BLANCA NORTH') and product_id not in ('${skip_product_ids.join(
       "','"
     )}') `;
 
@@ -419,7 +419,7 @@ module.exports = async (fastify, opts) => {
       "BVCA.H416",
       "BVMT.H747",
     ];
-    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and product_id like 'VLC%' and product_id not in ('${skip_product_ids.join(
+    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and (product_id like 'VLC%' or region = 'Valencia'or region = 'Castellon') and product_id not in ('${skip_product_ids.join(
       "','"
     )}') `;
 
@@ -482,7 +482,7 @@ module.exports = async (fastify, opts) => {
       "BVCA.H416",
       "BVMT.H747",
     ];
-    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and (product_id like 'HE%' or product_id like 'MH%') and product_id not in ('${skip_product_ids.join(
+    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and (product_id like 'HE%' or product_id like 'MH%' or region = 'COSTA BLANCA SOUTH'or region = 'Almeria' or region like 'Murcia%') and product_id not in ('${skip_product_ids.join(
       "','"
     )}') `;
 
