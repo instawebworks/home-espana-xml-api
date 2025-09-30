@@ -608,9 +608,10 @@ module.exports = async (fastify, opts) => {
           Product_Id: product_id,
           Crm_JSON: crm_json,
           xml_data,
+          region
         } = property;
         insert_properties.push(
-          `($${++count},$${++count},$${++count},$${++count},$${++count},$${++count})`
+          `($${++count},$${++count},$${++count},$${++count},$${++count},$${++count}),$${++count})`
         );
         datas.push(crm_record_id);
         datas.push(status);
@@ -618,9 +619,10 @@ module.exports = async (fastify, opts) => {
         datas.push(modified_time);
         datas.push(crm_json);
         datas.push(xml_data);
+        datas.push(region)
       }
 
-      const queryString = `INSERT INTO properties (crm_record_id, status, product_id, modified_time, crm_json, xml_data ) values ${insert_properties.join(
+      const queryString = `INSERT INTO properties (crm_record_id, status, product_id, modified_time, crm_json, xml_data, region ) values ${insert_properties.join(
         ","
       )} ON CONFLICT (crm_record_id) DO UPDATE SET xml_data = excluded.xml_data, status = excluded.status, product_id = excluded.product_id, crm_json = excluded.crm_json `;
 
