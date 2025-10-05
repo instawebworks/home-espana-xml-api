@@ -356,9 +356,13 @@ module.exports = async (fastify, opts) => {
       "BVCA.H416",
       "BVMT.H747",
     ];
-    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and (product_id like 'NCB%' or region = 'COSTA BLANCA NORTH') and product_id not in ('${skip_product_ids.join(
+    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and region = 'COSTA BLANCA NORTH' and product_id not in ('${skip_product_ids.join(
       "','"
     )}') `;
+
+    // const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and (product_id like 'NCB%' or region = 'COSTA BLANCA NORTH') and product_id not in ('${skip_product_ids.join(
+    //   "','"
+    // )}') `;
 
     const { rows: totalCount, fields } = await fastify.epDbConn.query(
       queryString
@@ -368,11 +372,12 @@ module.exports = async (fastify, opts) => {
     const allPromise = [];
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
-      const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and product_id like 'NCB%' and product_id not in ('${skip_product_ids.join(
+      const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and region = 'COSTA BLANCA NORTH' and product_id not in ('${skip_product_ids.join(
         "','"
       )}')  limit ${perPage} offset ${i - 1}`;
       allPromise.push(fastify.epDbConn.query(queryString));
     }
+    console.log({ allPromise })
     const allData = await Promise.all(allPromise).then((data) => {
       return data;
     });
@@ -419,23 +424,30 @@ module.exports = async (fastify, opts) => {
       "BVCA.H416",
       "BVMT.H747",
     ];
-    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and (product_id like 'VLC%' or region = 'Valencia'or region = 'Castellon') and product_id not in ('${skip_product_ids.join(
+    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and (region = 'VALENCIA'or region = 'CASTELLON') and product_id not in ('${skip_product_ids.join(
       "','"
     )}') `;
+    console.log(queryString)
+    // const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and (product_id like 'VLC%' or region = 'Valencia'or region = 'Castellon') and product_id not in ('${skip_product_ids.join(
+    //   "','"
+    // )}') `;
 
     const { rows: totalCount, fields } = await fastify.epDbConn.query(
       queryString
     );
+
     const rowCount = totalCount?.[0]?.count || 0;
     console.log({ rowCount })
     const allPromise = [];
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
-      const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and product_id like 'VLC%' and product_id not in ('${skip_product_ids.join(
+      const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and (region = 'VALENCIA'or region = 'CASTELLON') and product_id not in ('${skip_product_ids.join(
         "','"
       )}')  limit ${perPage} offset ${i - 1}`;
+
       allPromise.push(fastify.epDbConn.query(queryString));
     }
+    console.log({ allPromise })
     const allData = await Promise.all(allPromise).then((data) => {
       return data;
     });
@@ -482,9 +494,14 @@ module.exports = async (fastify, opts) => {
       "BVCA.H416",
       "BVMT.H747",
     ];
-    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and (product_id like 'HE%' or product_id like 'MH%' or region = 'COSTA BLANCA SOUTH'or region = 'Almeria' or region like 'Murcia%') and product_id not in ('${skip_product_ids.join(
+    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and (region = 'COSTA BLANCA SOUTH'or region = 'Almeria' or region like 'Murcia%') and product_id not in ('${skip_product_ids.join(
       "','"
     )}') `;
+    console.log({ queryString })
+
+    // const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and (product_id like 'HE%' or product_id like 'MH%' or region = 'COSTA BLANCA SOUTH'or region = 'Almeria' or region like 'Murcia%') and product_id not in ('${skip_product_ids.join(
+    //   "','"
+    // )}') `;
 
     const { rows: totalCount, fields } = await fastify.epDbConn.query(
       queryString
@@ -494,11 +511,12 @@ module.exports = async (fastify, opts) => {
     const allPromise = [];
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
-      const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and (product_id like 'HE%' or product_id like 'MH%') and product_id not in ('${skip_product_ids.join(
+      const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and (region = 'COSTA BLANCA SOUTH'or region = 'Almeria' or region like 'Murcia%') and product_id not in ('${skip_product_ids.join(
         "','"
       )}')  limit ${perPage} offset ${i - 1}`;
       allPromise.push(fastify.epDbConn.query(queryString));
     }
+    console.log({ allPromise })
     const allData = await Promise.all(allPromise).then((data) => {
       return data;
     });
