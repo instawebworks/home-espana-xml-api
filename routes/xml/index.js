@@ -201,7 +201,7 @@ module.exports = async (fastify, opts) => {
     xml_str = xml_str.replaceAll("&", "&amp;");
 
     xml_str = xml_str.replaceAll('"', "&quot;");
-    xml_str = xml_str.replaceAll(",", "&apos;");
+    // xml_str = xml_str.replaceAll("'", "&apos;");
     // xml_str = xml_str.replaceAll("\n", "<br />");
     // xml_str = xml_str.replaceAll("\n\r", "");
     // xml_str = xml_str.replaceAll("\r\n", "");
@@ -257,7 +257,7 @@ module.exports = async (fastify, opts) => {
     xml_str = xml_str.replaceAll("&", "&amp;");
 
     xml_str = xml_str.replaceAll('"', "&quot;");
-    xml_str = xml_str.replaceAll(",", "&apos;");
+    xml_str = xml_str.replaceAll("'", "&apos;");
     // xml_str = xml_str.replaceAll("\n", "<br />");
     // xml_str = xml_str.replaceAll("\n\r", "");
     // xml_str = xml_str.replaceAll("\r\n", "");
@@ -300,7 +300,9 @@ module.exports = async (fastify, opts) => {
     const { rows: totalCount, fields } = await fastify.epDbConn.query(
       queryString
     );
+
     const rowCount = totalCount?.[0]?.count || 0;
+    console.log({ rowCount })
     const allPromise = [];
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
@@ -326,7 +328,7 @@ module.exports = async (fastify, opts) => {
     xml_str = xml_str.replaceAll("&", "&amp;");
 
     xml_str = xml_str.replaceAll('"', "&quot;");
-    xml_str = xml_str.replaceAll(",", "&apos;");
+    xml_str = xml_str.replaceAll("'", "&apos;");
     // xml_str = xml_str.replaceAll("\n", "<br />");
     // xml_str = xml_str.replaceAll("\n\r", "");
     // xml_str = xml_str.replaceAll("\r\n", "");
@@ -395,7 +397,7 @@ module.exports = async (fastify, opts) => {
     xml_str = xml_str.replaceAll("&", "&amp;");
 
     xml_str = xml_str.replaceAll('"', "&quot;");
-    xml_str = xml_str.replaceAll(",", "&apos;");
+    xml_str = xml_str.replaceAll("'", "&apos;");
     // xml_str = xml_str.replaceAll("\n", "<br />");
     // xml_str = xml_str.replaceAll("\n\r", "");
     // xml_str = xml_str.replaceAll("\r\n", "");
@@ -465,7 +467,7 @@ module.exports = async (fastify, opts) => {
     xml_str = xml_str.replaceAll("&", "&amp;");
 
     xml_str = xml_str.replaceAll('"', "&quot;");
-    xml_str = xml_str.replaceAll(",", "&apos;");
+    xml_str = xml_str.replaceAll("'", "&apos;");
     // xml_str = xml_str.replaceAll("\n", "<br />");
     // xml_str = xml_str.replaceAll("\n\r", "");
     // xml_str = xml_str.replaceAll("\r\n", "");
@@ -534,7 +536,7 @@ module.exports = async (fastify, opts) => {
     xml_str = xml_str.replaceAll("&", "&amp;");
 
     xml_str = xml_str.replaceAll('"', "&quot;");
-    xml_str = xml_str.replaceAll(",", "&apos;");
+    xml_str = xml_str.replaceAll("'", "&apos;");
     // xml_str = xml_str.replaceAll("\n", "<br />");
     // xml_str = xml_str.replaceAll("\n\r", "");
     // xml_str = xml_str.replaceAll("\r\n", "");
@@ -597,7 +599,7 @@ module.exports = async (fastify, opts) => {
     xml_str = xml_str.replaceAll("&", "&amp;");
 
     xml_str = xml_str.replaceAll('"', "&quot;");
-    xml_str = xml_str.replaceAll(",", "&apos;");
+    xml_str = xml_str.replaceAll("'", "&apos;");
     // xml_str = xml_str.replaceAll("\n", "<br />");
     // xml_str = xml_str.replaceAll("\n\r", "");
     // xml_str = xml_str.replaceAll("\r\n", "");
