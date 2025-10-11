@@ -201,7 +201,7 @@ module.exports = async (fastify, opts) => {
     xml_str = xml_str.replaceAll("&", "&amp;");
 
     xml_str = xml_str.replaceAll('"', "&quot;");
-    // xml_str = xml_str.replaceAll("'", "&apos;");
+    xml_str = xml_str.replaceAll("'", "&apos;");
     // xml_str = xml_str.replaceAll("\n", "<br />");
     // xml_str = xml_str.replaceAll("\n\r", "");
     // xml_str = xml_str.replaceAll("\r\n", "");
@@ -257,7 +257,7 @@ module.exports = async (fastify, opts) => {
     xml_str = xml_str.replaceAll("&", "&amp;");
 
     xml_str = xml_str.replaceAll('"', "&quot;");
-    xml_str = xml_str.replaceAll("'", "&apos;");
+    // xml_str = xml_str.replaceAll("'", "&apos;");
     // xml_str = xml_str.replaceAll("\n", "<br />");
     // xml_str = xml_str.replaceAll("\n\r", "");
     // xml_str = xml_str.replaceAll("\r\n", "");
@@ -302,7 +302,7 @@ module.exports = async (fastify, opts) => {
     );
 
     const rowCount = totalCount?.[0]?.count || 0;
-    console.log({ rowCount })
+    console.log({ rowCount });
     const allPromise = [];
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
@@ -328,7 +328,7 @@ module.exports = async (fastify, opts) => {
     xml_str = xml_str.replaceAll("&", "&amp;");
 
     xml_str = xml_str.replaceAll('"', "&quot;");
-    xml_str = xml_str.replaceAll("'", "&apos;");
+    // xml_str = xml_str.replaceAll("'", "&apos;");
     // xml_str = xml_str.replaceAll("\n", "<br />");
     // xml_str = xml_str.replaceAll("\n\r", "");
     // xml_str = xml_str.replaceAll("\r\n", "");
@@ -370,7 +370,7 @@ module.exports = async (fastify, opts) => {
       queryString
     );
     const rowCount = totalCount?.[0]?.count || 0;
-    console.log({ rowCount })
+    console.log({ rowCount });
     const allPromise = [];
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
@@ -379,7 +379,7 @@ module.exports = async (fastify, opts) => {
       )}')  limit ${perPage} offset ${i - 1}`;
       allPromise.push(fastify.epDbConn.query(queryString));
     }
-    console.log({ allPromise })
+    console.log({ allPromise });
     const allData = await Promise.all(allPromise).then((data) => {
       return data;
     });
@@ -397,7 +397,7 @@ module.exports = async (fastify, opts) => {
     xml_str = xml_str.replaceAll("&", "&amp;");
 
     xml_str = xml_str.replaceAll('"', "&quot;");
-    xml_str = xml_str.replaceAll("'", "&apos;");
+    // xml_str = xml_str.replaceAll("'", "&apos;");
     // xml_str = xml_str.replaceAll("\n", "<br />");
     // xml_str = xml_str.replaceAll("\n\r", "");
     // xml_str = xml_str.replaceAll("\r\n", "");
@@ -429,7 +429,7 @@ module.exports = async (fastify, opts) => {
     const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status = 'Sold By HomeEspana') and (region = 'VALENCIA'or region = 'CASTELLON') and product_id not in ('${skip_product_ids.join(
       "','"
     )}') `;
-    console.log(queryString)
+    console.log(queryString);
     // const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and (product_id like 'VLC%' or region = 'Valencia'or region = 'Castellon') and product_id not in ('${skip_product_ids.join(
     //   "','"
     // )}') `;
@@ -439,7 +439,7 @@ module.exports = async (fastify, opts) => {
     );
 
     const rowCount = totalCount?.[0]?.count || 0;
-    console.log({ rowCount })
+    console.log({ rowCount });
     const allPromise = [];
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
@@ -449,7 +449,7 @@ module.exports = async (fastify, opts) => {
 
       allPromise.push(fastify.epDbConn.query(queryString));
     }
-    console.log({ allPromise })
+    console.log({ allPromise });
     const allData = await Promise.all(allPromise).then((data) => {
       return data;
     });
@@ -467,7 +467,7 @@ module.exports = async (fastify, opts) => {
     xml_str = xml_str.replaceAll("&", "&amp;");
 
     xml_str = xml_str.replaceAll('"', "&quot;");
-    xml_str = xml_str.replaceAll("'", "&apos;");
+    // xml_str = xml_str.replaceAll("'", "&apos;");
     // xml_str = xml_str.replaceAll("\n", "<br />");
     // xml_str = xml_str.replaceAll("\n\r", "");
     // xml_str = xml_str.replaceAll("\r\n", "");
@@ -499,7 +499,7 @@ module.exports = async (fastify, opts) => {
     const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA'  or status = 'Sold By HomeEspana' ) and (region = 'COSTA BLANCA SOUTH' or region = 'ALMERIA' or region like 'Murcia%') and product_id not in ('${skip_product_ids.join(
       "','"
     )}') `;
-    console.log({ queryString })
+    console.log({ queryString });
 
     // const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and (product_id like 'HE%' or product_id like 'MH%' or region = 'COSTA BLANCA SOUTH'or region = 'Almeria' or region like 'Murcia%') and product_id not in ('${skip_product_ids.join(
     //   "','"
@@ -509,7 +509,7 @@ module.exports = async (fastify, opts) => {
       queryString
     );
     const rowCount = totalCount?.[0]?.count || 0;
-    console.log({ rowCount })
+    console.log({ rowCount });
     const allPromise = [];
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
@@ -518,7 +518,7 @@ module.exports = async (fastify, opts) => {
       )}')  limit ${perPage} offset ${i - 1}`;
       allPromise.push(fastify.epDbConn.query(queryString));
     }
-    console.log({ allPromise })
+    console.log({ allPromise });
     const allData = await Promise.all(allPromise).then((data) => {
       return data;
     });
@@ -536,7 +536,7 @@ module.exports = async (fastify, opts) => {
     xml_str = xml_str.replaceAll("&", "&amp;");
 
     xml_str = xml_str.replaceAll('"', "&quot;");
-    xml_str = xml_str.replaceAll("'", "&apos;");
+    // xml_str = xml_str.replaceAll("'", "&apos;");
     // xml_str = xml_str.replaceAll("\n", "<br />");
     // xml_str = xml_str.replaceAll("\n\r", "");
     // xml_str = xml_str.replaceAll("\r\n", "");
@@ -573,7 +573,7 @@ module.exports = async (fastify, opts) => {
       queryString
     );
     const rowCount = totalCount?.[0]?.count || 0;
-    console.log({ rowCount })
+    console.log({ rowCount });
     const allPromise = [];
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
@@ -599,7 +599,7 @@ module.exports = async (fastify, opts) => {
     xml_str = xml_str.replaceAll("&", "&amp;");
 
     xml_str = xml_str.replaceAll('"', "&quot;");
-    xml_str = xml_str.replaceAll("'", "&apos;");
+    // xml_str = xml_str.replaceAll("'", "&apos;");
     // xml_str = xml_str.replaceAll("\n", "<br />");
     // xml_str = xml_str.replaceAll("\n\r", "");
     // xml_str = xml_str.replaceAll("\r\n", "");
@@ -628,7 +628,7 @@ module.exports = async (fastify, opts) => {
           Product_Id: product_id,
           Crm_JSON: crm_json,
           xml_data,
-          region
+          region,
         } = property;
         insert_properties.push(
           `($${++count},$${++count},$${++count},$${++count},$${++count},$${++count},$${++count})`
@@ -639,7 +639,7 @@ module.exports = async (fastify, opts) => {
         datas.push(modified_time);
         datas.push(crm_json);
         datas.push(xml_data);
-        datas.push(region)
+        datas.push(region);
       }
 
       const queryString = `INSERT INTO properties (crm_record_id, status, product_id, modified_time, crm_json, xml_data, region ) values ${insert_properties.join(
@@ -792,7 +792,8 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1091,7 +1092,8 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1420,7 +1422,8 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
