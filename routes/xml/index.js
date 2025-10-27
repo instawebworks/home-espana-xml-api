@@ -1187,6 +1187,7 @@ module.exports = async (fastify, opts) => {
       process.env.SANDBOX_ACCESS_TOKEN_URL
     );
     const accessToken = accessTokenResp?.data?.accessToken || "";
+
     if (accessToken == "") {
       return {
         data: null,
@@ -1458,7 +1459,7 @@ module.exports = async (fastify, opts) => {
       console.log({ updatedCRMJSON });
 
       if (Object.keys(updatedCRMJSON).length > 0) {
-        updatedCRMJSON.Status = "Live";
+        // updatedCRMJSON.Status = "Live";
         updatedCRMData.push({
           Update_Json: JSON.stringify(updatedCRMJSON),
           Properties: crmJSON?.[referenceKey]?.["id"],
