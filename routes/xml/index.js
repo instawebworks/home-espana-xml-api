@@ -2,7 +2,7 @@ const convert = require("xml-js");
 // const xmlProperties = require("./xmlproperties.json");
 // const crmJSON = require("./crmjson.json");
 const fs = require("fs");
-const test = true;
+const test = false;
 let propertyFieldMapping = {
   id: "PID_Old",
   ref: "Internal_Reference",
@@ -1206,7 +1206,7 @@ module.exports = async (fastify, opts) => {
       spaces: 2,
     });
     const xmlProperties = JSON.parse(convertToJSON).root.property;
-    console.log({ xmlProperties })
+
 
     let propIds = [];
     xmlProperties.forEach((indv) => {
