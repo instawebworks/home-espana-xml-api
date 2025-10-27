@@ -2,7 +2,7 @@ const convert = require("xml-js");
 // const xmlProperties = require("./xmlproperties.json");
 // const crmJSON = require("./crmjson.json");
 const fs = require("fs");
-const test = false;
+const test = true;
 let propertyFieldMapping = {
   id: "PID_Old",
   ref: "Internal_Reference",
@@ -16,8 +16,8 @@ let propertyFieldMapping = {
   beds: "Bedrooms",
   baths: "Bathrooms",
   pool: "Swimming_Pool",
-  latitude: "Lat",
-  longitude: "Lng",
+  "location.latitude": "Lat",
+  "location.longitude": "Lng",
   parking: "Parking",
   "beds._cdata": "Bedrooms",
   "baths._cdata": "Bathrooms",
@@ -1206,6 +1206,7 @@ module.exports = async (fastify, opts) => {
       spaces: 2,
     });
     const xmlProperties = JSON.parse(convertToJSON).root.property;
+    console.log({ xmlProperties })
 
     let propIds = [];
     xmlProperties.forEach((indv) => {
@@ -1454,7 +1455,7 @@ module.exports = async (fastify, opts) => {
         // if (valueFromCRM == value) return;
         updatedCRMJSON[crmApiKey] = value;
       });
-      // console.log({ updatedCRMJSON });
+      console.log({ updatedCRMJSON });
 
       if (Object.keys(updatedCRMJSON).length > 0) {
         updatedCRMJSON.Status = "Live";
@@ -1490,22 +1491,25 @@ module.exports = async (fastify, opts) => {
         }
       }
     }
-    // console.log(updatedCRMData.length);
-    if (updatedCRMData.length > 0) {
-      try {
-        const ress = await fastify.axios({
-          url: "https://sandbox.zohoapis.eu/crm/v7/Property_Update_Log",
-          data: { data: updatedCRMData },
-          headers: { Authorization: accessToken },
-          method: "POST",
-        });
-        returnData.push(ress?.data?.data);
-      } catch (error) {
-        // console.log({ error });
+    console.log(updatedCRMData);
+    if (test != true) {
+      if (updatedCRMData.length > 0) {
+        try {
+          const ress = await fastify.axios({
+            url: "https://sandbox.zohoapis.eu/crm/v7/Property_Update_Log",
+            data: { data: updatedCRMData },
+            headers: { Authorization: accessToken },
+            method: "POST",
+          });
+          returnData.push(ress?.data?.data);
+        } catch (error) {
+          // console.log({ error });
+        }
       }
     }
 
-    return returnData;
-    // return { updatedCRMData };
+
+    // return returnData;
+    return { updatedCRMData };
   });
 };
