@@ -17,7 +17,7 @@ let propertyFieldMapping = {
   baths: "Bathrooms",
   pool: "Swimming_Pool",
   "location.latitude": "Lat",
-  locationlongitude: "Lng",
+  "location.longitude": "Lng",
   parking: "Parking",
   "beds._cdata": "Bedrooms",
   "baths._cdata": "Bathrooms",
@@ -1189,6 +1189,7 @@ module.exports = async (fastify, opts) => {
       process.env.SANDBOX_ACCESS_TOKEN_URL
     );
     const accessToken = accessTokenResp?.data?.accessToken || "";
+
     if (accessToken == "") {
       return {
         data: null,
@@ -1457,10 +1458,10 @@ module.exports = async (fastify, opts) => {
         // if (valueFromCRM == value) return;
         updatedCRMJSON[crmApiKey] = value;
       });
-      // console.log({ updatedCRMJSON });
+      console.log({ updatedCRMJSON });
 
       if (Object.keys(updatedCRMJSON).length > 0) {
-        updatedCRMJSON.Status = "Live";
+        // updatedCRMJSON.Status = "Live";
         updatedCRMData.push({
           Update_Json: JSON.stringify(updatedCRMJSON),
           Properties: crmJSON?.[referenceKey]?.["id"],
@@ -1493,7 +1494,7 @@ module.exports = async (fastify, opts) => {
         }
       }
     }
-    // console.log(updatedCRMData.length);
+
     if (test != true) {
       if (updatedCRMData.length > 0) {
         try {
@@ -1510,7 +1511,7 @@ module.exports = async (fastify, opts) => {
       }
     }
 
-    return returnData;
-    // return { updatedCRMData };
+    // return returnData;
+    return { updatedCRMData };
   });
 };
