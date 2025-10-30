@@ -2,7 +2,7 @@ const convert = require("xml-js");
 // const xmlProperties = require("./xmlproperties.json");
 // const crmJSON = require("./crmjson.json");
 const fs = require("fs");
-const test = false;
+const test = true;
 let propertyFieldMapping = {
   id: "PID_Old",
   ref: "Internal_Reference",
@@ -15,7 +15,6 @@ let propertyFieldMapping = {
   province: "Region", // Instead of Province
   beds: "Bedrooms",
   baths: "Bathrooms",
-  pool: "Swimming_Pool",
   "location.latitude": "Lat",
   "location.longitude": "Lng",
   parking: "Parking",
@@ -30,10 +29,19 @@ let propertyFieldMapping = {
   "energy_rating.emissions": "Emissions",
   "url.en": "Link",
   video_url: "Youtube_Video_Code",
-  "Communal Pool": "Swimming_Pool",
+  pool: "Swimming_Pool",
+  "Pool Private": "Swimming_Pool",
   "Private Pool": "Swimming_Pool",
+  "Private pool": "Swimming_Pool",
+  "Pool Communal": "Swimming_Pool",
+  "Communal Pool": "Swimming_Pool",
+  "Communal pool": "Swimming_Pool",
+  "Community garden": "Garden",
+  "Communal garden": "Garden",
   "Communal Garden": "Garden",
   "Private Garden": "Garden",
+  "Parking Garage": "Parking",
+  "Off road parking": "Parking",
   "Off Road Parking": "Parking",
   "Secured Parking": "Parking",
   "Garage Parking": "Parking",
@@ -49,6 +57,7 @@ let propertyFieldMapping = {
   "Views of pool": "Views_of_Pool",
   Alarm: "Alarm",
   "Sea View": "Sea_view",
+  "Sea views": "Sea_view",
   "Outdoor Kitchen": "Summer_kitchen",
   "Separate Accomodation": "Separate_Accomodation",
   "Open Sea Views": "Property_View",
@@ -57,6 +66,9 @@ let propertyFieldMapping = {
   Heating: "Heating",
   "Open Fire": "Open_Fire",
   "Air Conditioning": "Air_Con",
+  "A/C": "Air_Con",
+  "Air conditioning": "Air_Con",
+  "Central Heating": "Heating",
   Lift: "Lift",
   Underbuild: "Underbuild",
   Solarium: "Solarium",
@@ -65,9 +77,29 @@ let propertyFieldMapping = {
   "images.image": "Photos",
   desc: "Full_description",
   feed_agent: "Feed_Agent",
+  Jacuzzi: "Jacuzzi",
+  Storeroom: "Storage_Unit",
+  Fireplace: "Open_Fire",
+  "Broadband Internet": "Broadband",
+  "One-floor": "Levels_in_Property",
+  "Disabled Access": "Disabled_access",
+  "Double glazing": "Double_glazing",
+  Furnished: "Furnished",
+  new_build: "New_Build_Resale",
+  "desc.en": "Full_description",
 };
 
 let propertyFeatures = [
+  "A/C",
+  "Air conditioning",
+  "Central Heating",
+  "Jacuzzi",
+  "Storeroom",
+  "Fireplace",
+  "Broadband Internet",
+  "Disabled Access",
+  "Sea views",
+  "Double glazing",
   "Air Conditioning",
   "Fitted Kitchen",
   "Furnished",
@@ -159,17 +191,26 @@ let propertyFeatures = [
 let currentSituationsOfProperty = ["features", "images"];
 
 let serviceMap = {
+  "Pool Private": "Private",
+  "Private pool": "Private",
+  "Pool Communal": "Communal",
+  "Communal pool": "Communal",
   "Communal Pool": "Comunnal",
   "Private Pool": "Private",
   "Communal Garden": "Comunnal", //Garden
+  "Community garden": "Comunnal",
   "Private Garden": "Private",
   "Off Road Parking": "Off Road", //Parking
   "Secured Parking": "Secure",
+  "Parking Garage": "Garage",
+  "Off road parking": "Off Road",
   "Garage parking": "Garage",
   "Garage Parking": "Garage",
   "Open Sea Views": "Open Sea", //Property View
   "Valley Views": "Valley",
   "Country Views": "Country",
+  "Parking Garage": "Garage",
+  "One-floor": "Property on 1 level",
 };
 
 module.exports = async (fastify, opts) => {
@@ -792,7 +833,8 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1091,7 +1133,8 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1208,7 +1251,6 @@ module.exports = async (fastify, opts) => {
     });
     const xmlProperties = JSON.parse(convertToJSON).root.property;
 
-
     let propIds = [];
     xmlProperties.forEach((indv) => {
       propIds.push(indv?.ref?._text);
@@ -1271,6 +1313,7 @@ module.exports = async (fastify, opts) => {
           // console.log({ new: valueFromXML });
         });
         let crmApiKey = propertyFieldMapping[key];
+
         if (key === "baths._cdata" || key === "baths") {
           updatedCRMJSON[crmApiKey] = Number(
             (valueFromXML?._text || valueFromXML).slice(0, 1)
@@ -1330,6 +1373,7 @@ module.exports = async (fastify, opts) => {
           updatedCRMJSON[crmApiKey] = "New Build";
           return;
         } else if (key === "new_build" && valueFromXML?._text !== "1") {
+          updatedCRMJSON[crmApiKey] = "Resale";
           return;
         }
 
@@ -1347,6 +1391,7 @@ module.exports = async (fastify, opts) => {
             "Townhouse",
             "Villa",
           ];
+          console.log({ key, crmApiKey, valueFromXML: valueFromXML?._text });
           // check wheather xml value is found in propertyTypes if fund put it to updatedCRMJSON otherwise do nothing
           const isFound = propertyTypes.find(
             (type) => type === valueFromXML?._text
@@ -1422,7 +1467,8 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1437,7 +1483,7 @@ module.exports = async (fastify, opts) => {
       //handle fatures
       feature?.forEach((itm) => {
         const crmApiKey = propertyFieldMapping?.[itm?._text];
-
+        // console.log({ text: itm?._text, crmApiKey });
         // Fitted Kitchen
         if (!crmApiKey) {
           return;
@@ -1456,7 +1502,7 @@ module.exports = async (fastify, opts) => {
         // if (valueFromCRM == value) return;
         updatedCRMJSON[crmApiKey] = value;
       });
-      console.log({ updatedCRMJSON });
+      // console.log({ updatedCRMJSON });
 
       if (Object.keys(updatedCRMJSON).length > 0) {
         // updatedCRMJSON.Status = "Live";
@@ -1492,7 +1538,7 @@ module.exports = async (fastify, opts) => {
         }
       }
     }
-    console.log(updatedCRMData);
+    // console.log(updatedCRMData);
     if (test != true) {
       if (updatedCRMData.length > 0) {
         try {
@@ -1509,8 +1555,7 @@ module.exports = async (fastify, opts) => {
       }
     }
 
-
     // return returnData;
-    return { updatedCRMData };
+    return { xmlProperties };
   });
 };
