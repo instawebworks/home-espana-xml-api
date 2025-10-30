@@ -16,8 +16,8 @@ let propertyFieldMapping = {
   beds: "Bedrooms",
   baths: "Bathrooms",
   pool: "Swimming_Pool",
-  latitude: "Lat",
-  longitude: "Lng",
+  "location.latitude": "Lat",
+  locationlongitude: "Lng",
   parking: "Parking",
   "beds._cdata": "Bedrooms",
   "baths._cdata": "Bathrooms",
@@ -792,7 +792,8 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1091,7 +1092,8 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1420,7 +1422,8 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1491,17 +1494,19 @@ module.exports = async (fastify, opts) => {
       }
     }
     // console.log(updatedCRMData.length);
-    if (updatedCRMData.length > 0) {
-      try {
-        const ress = await fastify.axios({
-          url: "https://sandbox.zohoapis.eu/crm/v7/Property_Update_Log",
-          data: { data: updatedCRMData },
-          headers: { Authorization: accessToken },
-          method: "POST",
-        });
-        returnData.push(ress?.data?.data);
-      } catch (error) {
-        // console.log({ error });
+    if (test != true) {
+      if (updatedCRMData.length > 0) {
+        try {
+          const ress = await fastify.axios({
+            url: "https://sandbox.zohoapis.eu/crm/v7/Property_Update_Log",
+            data: { data: updatedCRMData },
+            headers: { Authorization: accessToken },
+            method: "POST",
+          });
+          returnData.push(ress?.data?.data);
+        } catch (error) {
+          // console.log({ error });
+        }
       }
     }
 
