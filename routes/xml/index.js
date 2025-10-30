@@ -1391,6 +1391,13 @@ module.exports = async (fastify, opts) => {
             "Townhouse",
             "Villa",
           ];
+          const map = {
+            "Detached Villa": "Villa",
+            Plot: "Land",
+            Villas: "Villa",
+            Duplex: "Apartment",
+            "Town house": "Townhouse",
+          };
           console.log({ key, crmApiKey, valueFromXML: valueFromXML?._text });
           // check wheather xml value is found in propertyTypes if fund put it to updatedCRMJSON otherwise do nothing
           const isFound = propertyTypes.find(
