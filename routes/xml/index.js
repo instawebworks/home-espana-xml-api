@@ -941,8 +941,7 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${
-              index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1241,8 +1240,7 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${
-              index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1581,8 +1579,7 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${
-              index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
