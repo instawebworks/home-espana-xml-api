@@ -2,7 +2,70 @@ const convert = require("xml-js");
 // const xmlProperties = require("./xmlproperties.json");
 // const crmJSON = require("./crmjson.json");
 const fs = require("fs");
-const test = true;
+const test = false;
+// let propertyFieldMapping = {
+//   id: "PID_Old",
+//   ref: "Internal_Reference",
+//   price: "Price",
+//   new_build: "New_Build_Resale",
+//   "type.0": "Type_of_Property",
+//   type: "Type_of_Property",
+//   development: "Site_Public_Name",
+//   town: "Area",
+//   province: "Region", // Instead of Province
+//   beds: "Bedrooms",
+//   baths: "Bathrooms",
+//   pool: "Swimming_Pool",
+//   "location.latitude": "Lat",
+//   "location.longitude": "Lng",
+//   parking: "Parking",
+//   "beds._cdata": "Bedrooms",
+//   "baths._cdata": "Bathrooms",
+//   terrace: "Terraces",
+//   "Air Conditioning": "Air_Con",
+//   "Fitted Kitchen": "Fitted_kitchen",
+//   "surface_area.built": "Size_Build_m2",
+//   "surface_area.plot": "Size_Land_m2",
+//   "energy_rating.consumption": "Consumptions",
+//   "energy_rating.emissions": "Emissions",
+//   "url.en": "Link",
+//   video_url: "Youtube_Video_Code",
+//   "Communal Pool": "Swimming_Pool",
+//   "Private Pool": "Swimming_Pool",
+//   "Communal Garden": "Garden",
+//   "Private Garden": "Garden",
+//   "Off Road Parking": "Parking",
+//   "Secured Parking": "Parking",
+//   "Garage Parking": "Parking",
+//   "Garage parking": "Parking",
+//   "completion__1 - 2 Years": "Completion_old",
+//   "completion__More than 2 years": "Completion_2_old",
+//   developer: "Developer_old",
+//   url: "Link",
+//   Furnished: "Furnished",
+//   "Partially Furnished": "Furnished",
+//   "Fitted Kitchen": "Fitted_kitchen",
+//   "Double Glazing": "Double_glazing",
+//   "Views of pool": "Views_of_Pool",
+//   Alarm: "Alarm",
+//   "Sea View": "Sea_view",
+//   "Outdoor Kitchen": "Summer_kitchen",
+//   "Separate Accomodation": "Separate_Accomodation",
+//   "Open Sea Views": "Property_View",
+//   "Valley Views": "Property_View",
+//   "Country Views": "Property_View",
+//   Heating: "Heating",
+//   "Open Fire": "Open_Fire",
+//   "Air Conditioning": "Air_Con",
+//   Lift: "Lift",
+//   Underbuild: "Underbuild",
+//   Solarium: "Solarium",
+//   "Gated Development": "Gated_Development",
+//   "Disabled acess": "Disabled_acess",
+//   "images.image": "Photos",
+//   desc: "Full_description",
+//   feed_agent: "Feed_Agent",
+// };
 let propertyFieldMapping = {
   id: "PID_Old",
   ref: "Internal_Reference",
@@ -29,7 +92,6 @@ let propertyFieldMapping = {
   "energy_rating.emissions": "Emissions",
   "url.en": "Link",
   video_url: "Youtube_Video_Code",
-  pool: "Swimming_Pool",
   "Pool Private": "Swimming_Pool",
   "Private Pool": "Swimming_Pool",
   "Private pool": "Swimming_Pool",
@@ -88,6 +150,52 @@ let propertyFieldMapping = {
   new_build: "New_Build_Resale",
   "desc.en": "Full_description",
 };
+// const propertyMarketingFieldMapping = {
+//   id: "PID_Old",
+//   ref: "Internal_Reference",
+//   new_build: "New_Build_Resale",
+//   type: "Type_of_Property",
+//   town: "Area",
+//   beds: "Bedrooms",
+//   baths: "Bathrooms",
+//   "location.latitude": "Lat",
+//   "location.longitude": "Lng",
+//   "surface_area.built": "Size_Build_m2",
+//   "surface_area.plot": "Size_Land_m2",
+//   "desc.en": "Full_description",
+//   "Pool Private": "Swimming_Pool",
+//   "Private Pool": "Swimming_Pool",
+//   "Private pool": "Swimming_Pool",
+//   "Pool Communal": "Swimming_Pool",
+//   "Communal Pool": "Swimming_Pool",
+//   "Communal pool": "Swimming_Pool",
+//   "images.image": "Photos",
+//   "Community garden": "Garden",
+//   "Communal garden": "Garden",
+//   "Communal Garden": "Garden",
+//   "Private Garden": "Garden",
+//   Solarium: "Solarium",
+//   "Air Conditioning": "Air_Con",
+//   "A/C": "Air_Con",
+//   "Air conditioning": "Air_Con",
+//   "Central Heating": "Heating",
+//   "Parking Garage": "Parking",
+//   "Off road parking": "Parking",
+//   "Off Road Parking": "Parking",
+//   feed_agent: "Feed_Agent",
+//   Jacuzzi: "Jacuzzi",
+//   Storeroom: "Storage_Unit",
+//   Fireplace: "Open_Fire",
+//   "Broadband Internet": "Broadband",
+//   "One-floor": "Levels_in_Property",
+//   "Disabled Access": "Disabled_access",
+//   "Double glazing": "Double_glazing",
+//   Furnished: "Furnished",
+//   new_build: "New_Build_Resale",
+//   "Broadband Internet": "Broadband",
+//   "Sea View": "Sea_view",
+//   "Sea views": "Sea_view",
+// };
 
 let propertyFeatures = [
   "A/C",
@@ -1280,6 +1388,8 @@ module.exports = async (fastify, opts) => {
     let updatedCRMData = [];
     let returnData = [];
     console.log(xmlProperties.length);
+    // const typesValue = [];
+    // const features_not_handles = {};
     for (const xmlJSON of xmlProperties) {
       const property = {};
       const referenceKey = xmlJSON.ref._text;
@@ -1327,7 +1437,7 @@ module.exports = async (fastify, opts) => {
           updatedCRMJSON[crmApiKey] = Number(
             (valueFromXML?._text || valueFromXML).slice(0, 1)
           );
-          updatedCRMJSON["Bedroom_Options	"] =
+          updatedCRMJSON["Bedroom_Options"] =
             valueFromXML?._text || valueFromXML;
           return;
         }
@@ -1379,41 +1489,40 @@ module.exports = async (fastify, opts) => {
 
         //handle type.0 (Type_of_Property) based on clients requirement (if 1 then value will be Off Road)
         if (key === "type.0" || key === "type") {
-          const propertyTypes = [
-            "1st Floor Apartment",
-            "Apartment",
-            "Bungalow",
-            "Commercial",
-            "Ground Floor Apartment",
-            "Land",
-            "Penthouse Apartment",
-            "Studio Apartment",
-            "Townhouse",
-            "Villa",
-          ];
           const map = {
-            "Detached Villa": "Villa",
-            Plot: "Land",
-            Villas: "Villa",
-            Duplex: "Apartment",
-            "Town house": "Townhouse",
+            "DETACHED VILLA": "Villa",
+            PLOT: "Land",
+            VILLA: "Villa",
+            VILLAS: "Villa",
+            DUPLEX: "Apartment",
+            "TOWN HOUSE": "Townhouse",
+            "COMMERCIAL PROPERTY": "Commercial",
+            "PARKING – GARAGE": "None",
+            BUNGALOW: "Bungalow",
+            APARTMENTS: "Apartment",
+            APARTMENT: "Apartment",
           };
-          console.log({ key, crmApiKey, valueFromXML: valueFromXML?._text });
+
+          // console.log({
+          //   key,
+          //   crmApiKey,
+          //   valueFromXML: valueFromXML?._text.toUpperCase(),
+          //   option: map[valueFromXML?._text.toUpperCase()],
+          // });
+
           // check wheather xml value is found in propertyTypes if fund put it to updatedCRMJSON otherwise do nothing
-          const isFound = propertyTypes.find(
-            (type) => type === valueFromXML?._text
-          );
+          const isFound = map[valueFromXML?._text.toUpperCase()];
           if (!isFound) {
             return;
           }
-          updatedCRMJSON[crmApiKey] = valueFromXML?._text;
+          updatedCRMJSON[crmApiKey] = isFound;
+          return;
         }
 
         //if crm key is Area add '- ' before value
         if (key === "town" && crmApiKey === "Area") {
           updatedCRMJSON[crmApiKey] =
             "- " + valueFromXML?._text || valueFromXML;
-
           return;
         }
 
@@ -1469,8 +1578,6 @@ module.exports = async (fastify, opts) => {
       crmImageList = crmImageList.sort((a, b) => a.localeCompare(b));
       xmlImageList = xmlImageList.sort((a, b) => a.localeCompare(b));
 
-      // if (JSON.stringify(crmImageList) == JSON.stringify(xmlImageList)) {
-      // } else {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
@@ -1481,7 +1588,6 @@ module.exports = async (fastify, opts) => {
         .join("");
 
       updatedCRMJSON[propertyFieldMapping["images.image"]] = updatedImageList;
-      // }
 
       //convert feature to array
       const feature = [xmlJSON?.["features"]?.["feature"] || []].flat();
@@ -1490,9 +1596,11 @@ module.exports = async (fastify, opts) => {
       //handle fatures
       feature?.forEach((itm) => {
         const crmApiKey = propertyFieldMapping?.[itm?._text];
-        // console.log({ text: itm?._text, crmApiKey });
         // Fitted Kitchen
         if (!crmApiKey) {
+          // if (!features_not_handles[itm?._text]) {
+          //   features_not_handles[itm?._text] = itm?._text;
+          // }
           return;
         }
 
@@ -1563,6 +1671,13 @@ module.exports = async (fastify, opts) => {
     }
 
     // return returnData;
-    return { xmlProperties };
+    return {
+      // updatedCRMData,
+      // xmlProperties,
+      // XML_Data: updatedCRMData.map((item) => item.XML_Data),
+      updatedCRMData: updatedCRMData.map((item) =>
+        JSON.parse(item.Update_Json)
+      ),
+    };
   });
 };
