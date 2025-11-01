@@ -1312,8 +1312,7 @@ module.exports = async (fastify, opts) => {
 
     let returnData = [];
     console.log(xmlProperties.length);
-    // const typesValue = [];
-    // const features_not_handles = {};
+
     for (const xmlJSON of xmlProperties) {
       const property = {};
       const referenceKey = xmlJSON.ref._text;
@@ -1524,9 +1523,6 @@ module.exports = async (fastify, opts) => {
         const crmApiKey = propertyMarketingFieldMapping?.[itm?._text];
         // Fitted Kitchen
         if (!crmApiKey) {
-          // if (!features_not_handles[itm?._text]) {
-          //   features_not_handles[itm?._text] = itm?._text;
-          // }
           return;
         }
 
@@ -1540,7 +1536,8 @@ module.exports = async (fastify, opts) => {
 
         value = serviceMap?.[itm?._text] || value;
         // console.log({ crmApiKey, xmlVal: itm._text, value });
-        // if (valueFromCRM == value) return;
+        if (valueFromCRM == value) return;
+
         updatedCRMJSON[crmApiKey] = value;
       });
       // console.log({ updatedCRMJSON });
