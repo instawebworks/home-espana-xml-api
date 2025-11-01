@@ -1525,6 +1525,7 @@ module.exports = async (fastify, opts) => {
         if (!crmApiKey) {
           return;
         }
+        const valueFromCRM = crmJSON?.[referenceKey]?.[crmApiKey];
 
         let value;
 
