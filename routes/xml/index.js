@@ -1466,37 +1466,11 @@ module.exports = async (fastify, opts) => {
             serviceMap[isPrivatePoolFound?._text] ||
             serviceMap[isCommunalPoolFound?._text] ||
             "NO";
-          // console.log({
-          //   key,
-          //   crmApiKey,
-          //   valueFromXML,
-          //   feature,
-          //   isPrivatePoolFound,
-          //   isCommunalPoolFound,
-          //   value,
-          // });
+
           updatedCRMJSON[crmApiKey] = value;
           return;
         }
-        // if (key === "pool" && (valueFromXML?._text || valueFromXML) != "1") {
-        //   const feature = [xmlJSON?.["features"]?.["feature"] || []].flat();
-        //   const isPrivatePoolFound = feature.find(
-        //     (itm) =>
-        //       itm?._text.toLowerCase().includes("pool") &&
-        //       itm?._text.toLowerCase().includes("private")
-        //   );
-        //   const isCommunalPoolFound = feature.find(
-        //     (itm) =>
-        //       itm?._text.toLowerCase().includes("pool") &&
-        //       itm?._text.toLowerCase().includes("communal")
-        //   );
-        //   console.log({
-        //     key,
-        //     valueFromXML: valueFromXML?._text || valueFromXML,
-        //     isPrivatePoolFound,
-        //     isCommunalPoolFound,
-        //   });
-        // }
+
         if (key === "feed_agent") {
           const ref = referenceKey;
           let prefix;
@@ -1601,10 +1575,10 @@ module.exports = async (fastify, opts) => {
               spaces: 2,
             }) +
             "</property>",
-          // Properties: crmJSON?.[referenceKey]?.["id"],
-          // Original_JSON: JSON.stringify(crmJSON?.[referenceKey]),
-          // Update_Status: "Pending",
-          // XML_Source: "homeespananewbuild",
+          Properties: crmJSON?.[referenceKey]?.["id"],
+          Original_JSON: JSON.stringify(crmJSON?.[referenceKey]),
+          Update_Status: "Pending",
+          XML_Source: "homeespananewbuild",
         });
         if (test != true) {
           if (updatedCRMData.length == 100) {
