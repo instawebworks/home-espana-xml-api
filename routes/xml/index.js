@@ -71,7 +71,7 @@ let propertyMarketingFieldMapping = {
   ref: "Internal_Reference",
   price: "Price",
   new_build: "New_Build_Resale",
-  "type.0": "Type_of_Property",
+  "type._cdata": "Type_of_Property",
   type: "Type_of_Property",
   development: "Site_Public_Name",
   town: "Area",
@@ -1312,11 +1312,12 @@ module.exports = async (fastify, opts) => {
 
     let returnData = [];
     console.log(xmlProperties.length);
+    const testing = [];
 
     for (const xmlJSON of xmlProperties) {
       const property = {};
       const referenceKey = xmlJSON.ref._text;
-      // console.log({ referenceKey, xmlJSON });
+
       // if (!crmJSON[referenceKey]) return;
       Object.keys(xmlJSON).forEach((parent) => {
         if (
@@ -1324,6 +1325,7 @@ module.exports = async (fastify, opts) => {
           !currentSituationsOfProperty.includes(parent)
         ) {
           const children = Object.keys(xmlJSON[parent]);
+          // console.log({ children });
           children.forEach((child) => {
             if (child !== "_text") {
               property[`${parent}.${child}`] = `${parent}.${child}`;
@@ -1333,7 +1335,11 @@ module.exports = async (fastify, opts) => {
           });
         }
       });
-
+      // console.log({
+      //   type: xmlJSON.type,
+      //   propertyType: property.type,
+      // });
+      testing.push({ type: xmlJSON.type, property });
       const updatedCRMJSON = {};
 
       // handle keys except desc,features,images
@@ -1345,6 +1351,9 @@ module.exports = async (fastify, opts) => {
           valueFromXML = valueFromXML[itm];
           // console.log({ new: valueFromXML });
         });
+        // if (key == "type._cdata") {
+        //   console.log("outside", { key, valueFromXML });
+        // }
         let crmApiKey = propertyMarketingFieldMapping[key];
 
         if (key === "baths._cdata" || key === "baths") {
@@ -1412,7 +1421,8 @@ module.exports = async (fastify, opts) => {
         }
 
         //handle type.0 (Type_of_Property) based on clients requirement (if 1 then value will be Off Road)
-        if (key === "type.0" || key === "type") {
+        if (key === "type._cdata" || key === "type") {
+          // console.log({ valueFromXML, type: xmlJSON.type });
           const map = {
             "DETACHED VILLA": "Villa",
             PLOT: "Land",
@@ -1425,7 +1435,9 @@ module.exports = async (fastify, opts) => {
             BUNGALOW: "Bungalow",
             APARTMENTS: "Apartment",
             APARTMENT: "Apartment",
+            "APARTMENT / FLAT": "Apartment",
           };
+          const value = valueFromXML?._text || valueFromXML;
 
           // console.log({
           //   key,
@@ -1433,9 +1445,11 @@ module.exports = async (fastify, opts) => {
           //   valueFromXML: valueFromXML?._text.toUpperCase(),
           //   option: map[valueFromXML?._text.toUpperCase()],
           // });
-
           // check wheather xml value is found in propertyTypes if fund put it to updatedCRMJSON otherwise do nothing
-          const isFound = map[valueFromXML?._text.toUpperCase()];
+          const isFound = map[value.toUpperCase()];
+          // if (key == "type._cdata" || key == "type") {
+          //   console.log("inside", { key, value, isFound });
+          // }
           if (!isFound) {
             return;
           }
@@ -1462,10 +1476,30 @@ module.exports = async (fastify, opts) => {
               itm?._text.toLowerCase().includes("pool") &&
               itm?._text.toLowerCase().includes("communal")
           );
+
+          //grab property type
+          const propertyType = property?.["type"] || property?.["type._cdata"];
+          const propertyValue =
+            propertyType == "type._cdata"
+              ? xmlJSON["type"]._cdata
+              : xmlJSON["type"]._text;
+
+          //if property type includes villa then pool will be Private otherwise Communal
+          const poolValueBasedOnPropertyType = propertyValue
+            .toLowerCase()
+            .includes("villa")
+            ? "Private"
+            : "Communal";
+
           const value =
             serviceMap[isPrivatePoolFound?._text] ||
             serviceMap[isCommunalPoolFound?._text] ||
-            "NO";
+            poolValueBasedOnPropertyType;
+          // console.log({
+          //   propertyType,
+          //   propertyValue,
+          //   poolValueBasedOnPropertyType,
+          // });
 
           updatedCRMJSON[crmApiKey] = value;
           return;
@@ -1575,10 +1609,10 @@ module.exports = async (fastify, opts) => {
               spaces: 2,
             }) +
             "</property>",
-          Properties: crmJSON?.[referenceKey]?.["id"],
-          Original_JSON: JSON.stringify(crmJSON?.[referenceKey]),
-          Update_Status: "Pending",
-          XML_Source: "homeespananewbuild",
+          // Properties: crmJSON?.[referenceKey]?.["id"],
+          // Original_JSON: JSON.stringify(crmJSON?.[referenceKey]),
+          // Update_Status: "Pending",
+          // XML_Source: "homeespananewbuild",
         });
         if (test != true) {
           if (updatedCRMData.length == 100) {
@@ -1618,6 +1652,7 @@ module.exports = async (fastify, opts) => {
     // return returnData;
     return {
       updatedCRMData,
+      // xmlProperties: xmlProperties.map((item) => item?.type),
       // XML_Data: updatedCRMData.map((item) => item.XML_Data),
       // updatedCRMData: updatedCRMData.map((item) =>
       //   JSON.parse(item.Update_Json)
