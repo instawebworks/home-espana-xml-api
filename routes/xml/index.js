@@ -1495,11 +1495,6 @@ module.exports = async (fastify, opts) => {
             serviceMap[isPrivatePoolFound?._text] ||
             serviceMap[isCommunalPoolFound?._text] ||
             poolValueBasedOnPropertyType;
-          // console.log({
-          //   propertyType,
-          //   propertyValue,
-          //   poolValueBasedOnPropertyType,
-          // });
 
           updatedCRMJSON[crmApiKey] = value;
           return;
