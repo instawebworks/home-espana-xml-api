@@ -1601,10 +1601,10 @@ module.exports = async (fastify, opts) => {
               spaces: 2,
             }) +
             "</property>",
-          // Properties: crmJSON?.[referenceKey]?.["id"],
-          // Original_JSON: JSON.stringify(crmJSON?.[referenceKey]),
-          // Update_Status: "Pending",
-          // XML_Source: "homeespananewbuild",
+          Properties: crmJSON?.[referenceKey]?.["id"],
+          Original_JSON: JSON.stringify(crmJSON?.[referenceKey]),
+          Update_Status: "Pending",
+          XML_Source: "homeespananewbuild",
         });
         if (test != true) {
           if (updatedCRMData.length == 100) {
