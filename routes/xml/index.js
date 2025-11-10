@@ -864,8 +864,7 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${
-              index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1164,8 +1163,7 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${
-              index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1555,8 +1553,7 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${
-              index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1646,7 +1643,7 @@ module.exports = async (fastify, opts) => {
 
     // return returnData;
     return {
-      updatedCRMData,
+      returnData,
       // xmlProperties: xmlProperties.map((item) => item?.type),
       // XML_Data: updatedCRMData.map((item) => item.XML_Data),
       // updatedCRMData: updatedCRMData.map((item) =>
