@@ -75,7 +75,6 @@ let propertyMarketingFieldMapping = {
   type: "Type_of_Property",
   development: "Site_Public_Name",
   town: "Area",
-  province: "Region", // Instead of Province
   beds: "Bedrooms",
   baths: "Bathrooms",
   pool: "Swimming_Pool",
@@ -85,49 +84,60 @@ let propertyMarketingFieldMapping = {
   "beds._cdata": "Bedrooms",
   "baths._cdata": "Bathrooms",
   terrace: "Terraces",
-  "Air Conditioning": "Air_Con",
-  "Fitted Kitchen": "Fitted_kitchen",
+  "air conditioning": "Air_Con",
   "surface_area.built": "Size_Build_m2",
   "surface_area.plot": "Size_Land_m2",
   "energy_rating.consumption": "Consumptions",
   "energy_rating.emissions": "Emissions",
   "url.en": "Link",
   video_url: "Youtube_Video_Code",
-  "Communal Pool": "Swimming_Pool",
-  "Private Pool": "Swimming_Pool",
-  "Communal Garden": "Garden",
-  "Private Garden": "Garden",
-  "Off Road Parking": "Parking",
-  "Secured Parking": "Parking",
-  "Garage Parking": "Parking",
-  "Garage parking": "Parking",
+  "communal pool": "Swimming_Pool",
+  "private pool": "Swimming_Pool",
+  "community garden": "Garden",
+  "communal garden": "Garden",
+  "private garden": "Garden",
+  "off road parking": "Parking",
+  "secured parking": "Parking",
+  "garage parking": "Parking",
+  "parking garage": "Parking",
   "completion__1 - 2 Years": "Completion_old",
   "completion__More than 2 years": "Completion_2_old",
   developer: "Developer_old",
   url: "Link",
-  Furnished: "Furnished",
+  furnished: "Furnished",
   "Partially Furnished": "Furnished",
-  "Fitted Kitchen": "Fitted_kitchen",
-  "Double Glazing": "Double_glazing",
-  "Views of pool": "Views_of_Pool",
-  Alarm: "Alarm",
-  "Sea View": "Sea_view",
-  "Outdoor Kitchen": "Summer_kitchen",
-  "Separate Accomodation": "Separate_Accomodation",
-  "Open Sea Views": "Property_View",
-  "Valley Views": "Property_View",
-  "Country Views": "Property_View",
-  Heating: "Heating",
-  "Open Fire": "Open_Fire",
-  "Air Conditioning": "Air_Con",
-  Lift: "Lift",
-  Underbuild: "Underbuild",
-  Solarium: "Solarium",
-  "Gated Development": "Gated_Development",
-  "Disabled acess": "Disabled_acess",
+  "fitted kitchen": "Fitted_kitchen",
+  "double glazing": "Double_glazing",
+  "views of pool": "Views_of_Pool",
+  alarm: "Alarm",
+  "sea view": "Sea_view",
+  "sea views": "Sea_view",
+  "outdoor kitchen": "Summer_kitchen",
+  "separate zccomodation": "Separate_Accomodation",
+  "open sea views": "Property_View",
+  "valley views": "Property_View",
+  "country views": "Property_View",
+  heating: "Heating",
+  "central heating": "Heating",
+  "open fire": "Open_Fire",
+  "air conditioning": "Air_Con",
+  "a/c": "Air_Con",
+  lift: "Lift",
+  underbuild: "Underbuild",
+  solarium: "Solarium",
+  "gated development": "Gated_Development",
+  "disabled acess": "Disabled_acess",
   "images.image": "Photos",
   desc: "Full_description",
+  "desc.en": "Full_description",
   feed_agent: "Feed_Agent",
+  jacuzzi: "Jacuzzi",
+  storeroom: "Storage_Unit",
+  fireplace: "Open_Fire",
+  "broadband internet": "Broadband",
+  "one-floor": "Levels_in_Property",
+  "disabled access": "Disabled_access",
+  "double glazing": "Double_glazing",
 };
 
 let propertyFeatures = [
@@ -242,6 +252,66 @@ let serviceMap = {
   "Country Views": "Country",
   "Parking Garage": "Garage",
   "One-floor": "Property on 1 level",
+};
+
+let propertyMarketingFeatures = [
+  "double glazing",
+  "disabled access",
+  "broadband internet",
+  "fireplace",
+  "storeroom",
+  "jacuzzi",
+  "air conditioning",
+  "a/c",
+  "fitted kitchen",
+  "furnished",
+  "partially furnished",
+  "double glazing",
+  "views of pool",
+  "alarm",
+
+  "sea views",
+  "sea view",
+  "outdoor kitchen",
+  "separate accomodation",
+  "internet connection",
+  "heating",
+  "open fire",
+  "air conditioned",
+  "air con",
+  "lift",
+  "underbuild",
+  "solarium",
+  "gated development",
+  "disabled acess",
+  "garage",
+  "marble floors",
+  "summer kitchen",
+  "electricity",
+  "water supply",
+  "telephone",
+  "broadband",
+  "disabled access",
+  "central heating",
+];
+
+let serviceMapForPropertyMarketing = {
+  "pool private": "Private",
+  "private pool": "Private",
+  "pool communal": "Communal",
+  "communal pool": "Communal",
+  "communal garden": "Comunnal", //Garden
+  "community garden": "Comunnal",
+  "private garden": "Private",
+  "secured parking": "Secure",
+  "parking garage": "Garage",
+  "off road parking": "Off Road",
+  "garage parking": "Garage",
+  "open sea views": "Open Sea", //Property View
+  "valley views": "Valley",
+  "country views": "Country",
+  "parking garage": "Garage",
+  "one-floor": "Property on 1 level",
 };
 
 module.exports = async (fastify, opts) => {
@@ -864,7 +934,8 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1163,7 +1234,8 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1352,7 +1424,50 @@ module.exports = async (fastify, opts) => {
         // if (key == "type._cdata") {
         //   console.log("outside", { key, valueFromXML });
         // }
-        let crmApiKey = propertyMarketingFieldMapping[key];
+        let crmApiKey = propertyMarketingFieldMapping[key.toLowerCase()];
+
+        if (key === "energy_rating.consumption") {
+          const options = {
+            A: "A",
+            B: "B",
+            C: "C",
+            D: "D",
+            E: "E",
+            F: "F",
+            G: "G",
+          };
+          // console.log({
+          //   key,
+          //   crmApiKey,
+          //   keys,
+          //   valueFromXML: valueFromXML?._text || valueFromXML,
+          //   value: options[valueFromXML?._text || valueFromXML] || "Pending",
+          // });
+          updatedCRMJSON[crmApiKey] =
+            options[valueFromXML?._text || valueFromXML] || "Pending";
+          return;
+        }
+        if (key === "energy_rating.emissions") {
+          const options = {
+            A: "A",
+            B: "B",
+            C: "C",
+            D: "D",
+            E: "E",
+            F: "F",
+            G: "G",
+          };
+          // console.log({
+          //   key,
+          //   crmApiKey,
+          //   keys,
+          //   valueFromXML: valueFromXML?._text || valueFromXML,
+          //   value: options[valueFromXML?._text || valueFromXML] || "Pending",
+          // });
+          updatedCRMJSON[crmApiKey] =
+            options[valueFromXML?._text || valueFromXML] || "Pending";
+          return;
+        }
 
         if (key === "baths._cdata" || key === "baths") {
           updatedCRMJSON[crmApiKey] = Number(
@@ -1428,7 +1543,10 @@ module.exports = async (fastify, opts) => {
             VILLAS: "Villa",
             DUPLEX: "Apartment",
             "TOWN HOUSE": "Townhouse",
+            TOWNHOUSE: "Townhouse",
             "COMMERCIAL PROPERTY": "Commercial",
+            "COMMERCIAL SPACE": "Commercial",
+            "STUDIO APARTMENT": "Studio Apartment",
             "PARKING – GARAGE": "None",
             BUNGALOW: "Bungalow",
             APARTMENTS: "Apartment",
@@ -1490,8 +1608,12 @@ module.exports = async (fastify, opts) => {
             : "Communal";
 
           const value =
-            serviceMap[isPrivatePoolFound?._text] ||
-            serviceMap[isCommunalPoolFound?._text] ||
+            serviceMapForPropertyMarketing[
+              isPrivatePoolFound?._text.toLowerCase()
+            ] ||
+            serviceMapForPropertyMarketing[
+              isCommunalPoolFound?._text.toLowerCase()
+            ] ||
             poolValueBasedOnPropertyType;
 
           updatedCRMJSON[crmApiKey] = value;
@@ -1553,7 +1675,8 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1567,7 +1690,8 @@ module.exports = async (fastify, opts) => {
 
       //handle fatures
       feature?.forEach((itm) => {
-        const crmApiKey = propertyMarketingFieldMapping?.[itm?._text];
+        const crmApiKey =
+          propertyMarketingFieldMapping?.[itm?._text.toLowerCase()];
         // Fitted Kitchen
         if (!crmApiKey) {
           return;
@@ -1576,13 +1700,14 @@ module.exports = async (fastify, opts) => {
 
         let value;
 
-        if (propertyFeatures.includes(itm?._text)) {
+        if (propertyMarketingFeatures.includes(itm?._text.toLowerCase())) {
           value = "YES";
         } else {
           value = "NO";
         }
 
-        value = serviceMap?.[itm?._text] || value;
+        value =
+          serviceMapForPropertyMarketing?.[itm?._text.toLowerCase()] || value;
         // console.log({ crmApiKey, xmlVal: itm._text, value });
         if (valueFromCRM == value) return;
 
@@ -1592,6 +1717,7 @@ module.exports = async (fastify, opts) => {
 
       if (Object.keys(updatedCRMJSON).length > 0) {
         // updatedCRMJSON.Status = "Live";
+        updatedCRMJSON.Agent_Property = true;
         updatedCRMData.push({
           Update_Json: JSON.stringify(updatedCRMJSON),
           XML_Data:
@@ -1601,10 +1727,10 @@ module.exports = async (fastify, opts) => {
               spaces: 2,
             }) +
             "</property>",
-          Properties: crmJSON?.[referenceKey]?.["id"],
-          Original_JSON: JSON.stringify(crmJSON?.[referenceKey]),
-          Update_Status: "Pending",
-          XML_Source: "homeespananewbuild",
+          // Properties: crmJSON?.[referenceKey]?.["id"],
+          // Original_JSON: JSON.stringify(crmJSON?.[referenceKey]),
+          // Update_Status: "Pending",
+          // XML_Source: "homeespananewbuild",
         });
         if (test != true) {
           if (updatedCRMData.length == 100) {
@@ -1644,6 +1770,7 @@ module.exports = async (fastify, opts) => {
     // return returnData;
     return {
       returnData,
+      // updatedCRMData,
       // xmlProperties: xmlProperties.map((item) => item?.type),
       // XML_Data: updatedCRMData.map((item) => item.XML_Data),
       // updatedCRMData: updatedCRMData.map((item) =>
