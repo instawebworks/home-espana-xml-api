@@ -2,7 +2,7 @@ const convert = require("xml-js");
 // const xmlProperties = require("./xmlproperties.json");
 // const crmJSON = require("./crmjson.json");
 const fs = require("fs");
-const test = true;
+const test = false;
 let propertyFieldMapping = {
   id: "PID_Old",
   ref: "Internal_Reference",
@@ -1732,10 +1732,10 @@ module.exports = async (fastify, opts) => {
               spaces: 2,
             }) +
             "</property>",
-          // Properties: crmJSON?.[referenceKey]?.["id"],
-          // Original_JSON: JSON.stringify(crmJSON?.[referenceKey]),
-          // Update_Status: "Pending",
-          // XML_Source: "homeespananewbuild",
+          Properties: crmJSON?.[referenceKey]?.["id"],
+          Original_JSON: JSON.stringify(crmJSON?.[referenceKey]),
+          Update_Status: "Pending",
+          XML_Source: "homeespananewbuild",
         });
         if (test != true) {
           if (updatedCRMData.length == 100) {
@@ -1774,35 +1774,9 @@ module.exports = async (fastify, opts) => {
 
     // return returnData;
     return {
-      // returnData,
-      // new_buiilds,
-      // length: new_buiilds.length,
-
-      // testing,
-      // testing_length: testing.length,
-      // without_new_builds,
-      // without_length: without_new_builds.length,
-
+      returnData,
       updatedCRMData,
-      // withoutNewBuild: xmlProperties.flatMap((item) =>
-      //   !item?.new_build ? [item] : []
-      // ),
-      // withoutNewBuildLength: xmlProperties.flatMap((item) =>
-      //   !item?.new_build ? [item] : []
-      // ).length,
-      // withNewBuild: xmlProperties.flatMap((item) =>
-      //   item?.new_build ? [item] : []
-      // ),
-      // withNewBuildLength: xmlProperties.flatMap((item) =>
-      //   item?.new_build ? [item] : []
-      // ).length,
-      // xmlPropertiesLength: xmlProperties.length,
-
-      // without_new_build_crm_json: without_new_build_crm_json,
-      // without_new_build_crm_json_length: without_new_build_crm_json.length,
-      // with_new_build_crm_json: with_new_build_crm_json,
-      // with_new_build_crm_json_length: with_new_build_crm_json.length,
-
+      xmlPropertiesLength: xmlProperties.length,
       // XML_Data: updatedCRMData.map((item) => item.XML_Data),
       // updatedCRMData: updatedCRMData.map((item) =>
       //   JSON.parse(item.Update_Json)
