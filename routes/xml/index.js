@@ -2,7 +2,7 @@ const convert = require("xml-js");
 // const xmlProperties = require("./xmlproperties.json");
 // const crmJSON = require("./crmjson.json");
 const fs = require("fs");
-const test = false;
+const test = true;
 let propertyFieldMapping = {
   id: "PID_Old",
   ref: "Internal_Reference",
@@ -1382,7 +1382,6 @@ module.exports = async (fastify, opts) => {
 
     let returnData = [];
     console.log(xmlProperties.length);
-    const testing = [];
 
     for (const xmlJSON of xmlProperties) {
       const property = {};
@@ -1405,11 +1404,7 @@ module.exports = async (fastify, opts) => {
           });
         }
       });
-      // console.log({
-      //   type: xmlJSON.type,
-      //   propertyType: property.type,
-      // });
-      testing.push({ type: xmlJSON.type, property });
+
       const updatedCRMJSON = {};
 
       // handle keys except desc,features,images
@@ -1436,13 +1431,7 @@ module.exports = async (fastify, opts) => {
             F: "F",
             G: "G",
           };
-          // console.log({
-          //   key,
-          //   crmApiKey,
-          //   keys,
-          //   valueFromXML: valueFromXML?._text || valueFromXML,
-          //   value: options[valueFromXML?._text || valueFromXML] || "Pending",
-          // });
+
           updatedCRMJSON[crmApiKey] =
             options[valueFromXML?._text || valueFromXML] || "Pending";
           return;
@@ -1457,13 +1446,7 @@ module.exports = async (fastify, opts) => {
             F: "F",
             G: "G",
           };
-          // console.log({
-          //   key,
-          //   crmApiKey,
-          //   keys,
-          //   valueFromXML: valueFromXML?._text || valueFromXML,
-          //   value: options[valueFromXML?._text || valueFromXML] || "Pending",
-          // });
+
           updatedCRMJSON[crmApiKey] =
             options[valueFromXML?._text || valueFromXML] || "Pending";
           return;
@@ -1523,15 +1506,22 @@ module.exports = async (fastify, opts) => {
           updatedCRMJSON[crmApiKey] = "Off Road";
           return;
         }
+        // if (key === "new_build") {
+        //   new_buiilds.push({
+        //     key: "new_build",
+        //     value: valueFromXML?._text || valueFromXML,
+        //     xmlJSON,
+        //   });
+        // }
         //handle new_build based on clients requirement (if 1 then value will be New Build)
         //any other value except 1 wont be included to the updatedCRMJSON
-        if (key === "new_build" && valueFromXML?._text === "1") {
-          updatedCRMJSON[crmApiKey] = "New Build";
-          return;
-        } else if (key === "new_build" && valueFromXML?._text !== "1") {
-          updatedCRMJSON[crmApiKey] = "Resale";
-          return;
-        }
+        // if (key === "new_build" && valueFromXML?._text === "1") {
+        //   updatedCRMJSON[crmApiKey] = "New Build";
+        //   return;
+        // } else if (key === "new_build" && valueFromXML?._text !== "1") {
+        //   updatedCRMJSON[crmApiKey] = "Resale";
+        //   return;
+        // }
 
         //handle type.0 (Type_of_Property) based on clients requirement (if 1 then value will be Off Road)
         if (key === "type._cdata" || key === "type") {
@@ -1649,6 +1639,21 @@ module.exports = async (fastify, opts) => {
         updatedCRMJSON[crmApiKey] = valueFromXML?._text || valueFromXML;
       });
 
+      //we need to process new_build for ecery record thats why we are checking this seperately
+      //if new_build tag isn't found then we need to assign Resale
+      //if value is 1 then value is "New Build" otherwise "Resale"
+      if (!xmlJSON.new_build) {
+        const crmApiKey = propertyMarketingFieldMapping["new_build"];
+
+        updatedCRMJSON[crmApiKey] = "Resale";
+      }
+
+      if (xmlJSON.new_build) {
+        const crmApiKey = propertyMarketingFieldMapping["new_build"];
+        const value = xmlJSON.new_build._text || xmlJSON.new_build;
+
+        updatedCRMJSON[crmApiKey] = value == 1 ? "New Build" : "Resale";
+      }
       //handle images
       const imagesFromCRM = crmJSON?.[referenceKey]?.["Photos"]
         ?.split("\n")
@@ -1769,9 +1774,35 @@ module.exports = async (fastify, opts) => {
 
     // return returnData;
     return {
-      returnData,
-      // updatedCRMData,
-      // xmlProperties: xmlProperties.map((item) => item?.type),
+      // returnData,
+      // new_buiilds,
+      // length: new_buiilds.length,
+
+      // testing,
+      // testing_length: testing.length,
+      // without_new_builds,
+      // without_length: without_new_builds.length,
+
+      updatedCRMData,
+      // withoutNewBuild: xmlProperties.flatMap((item) =>
+      //   !item?.new_build ? [item] : []
+      // ),
+      // withoutNewBuildLength: xmlProperties.flatMap((item) =>
+      //   !item?.new_build ? [item] : []
+      // ).length,
+      // withNewBuild: xmlProperties.flatMap((item) =>
+      //   item?.new_build ? [item] : []
+      // ),
+      // withNewBuildLength: xmlProperties.flatMap((item) =>
+      //   item?.new_build ? [item] : []
+      // ).length,
+      // xmlPropertiesLength: xmlProperties.length,
+
+      // without_new_build_crm_json: without_new_build_crm_json,
+      // without_new_build_crm_json_length: without_new_build_crm_json.length,
+      // with_new_build_crm_json: with_new_build_crm_json,
+      // with_new_build_crm_json_length: with_new_build_crm_json.length,
+
       // XML_Data: updatedCRMData.map((item) => item.XML_Data),
       // updatedCRMData: updatedCRMData.map((item) =>
       //   JSON.parse(item.Update_Json)
