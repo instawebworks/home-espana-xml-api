@@ -84,6 +84,7 @@ let propertyMarketingFieldMapping = {
   "beds._cdata": "Bedrooms",
   "baths._cdata": "Bathrooms",
   terrace: "Terraces",
+  "air conditioner": "Air_Con",
   "air conditioning": "Air_Con",
   "surface_area.built": "Size_Build_m2",
   "surface_area.plot": "Size_Land_m2",
@@ -97,6 +98,7 @@ let propertyMarketingFieldMapping = {
   "communal garden": "Garden",
   "private garden": "Garden",
   "off road parking": "Parking",
+  "parking off-road": "Parking",
   "secured parking": "Parking",
   "garage parking": "Parking",
   "parking garage": "Parking",
@@ -133,6 +135,7 @@ let propertyMarketingFieldMapping = {
   feed_agent: "Feed_Agent",
   jacuzzi: "Jacuzzi",
   storeroom: "Storage_Unit",
+  "storage room": "Storage_Unit",
   fireplace: "Open_Fire",
   "broadband internet": "Broadband",
   "one-floor": "Levels_in_Property",
@@ -260,7 +263,9 @@ let propertyMarketingFeatures = [
   "broadband internet",
   "fireplace",
   "storeroom",
+  "storage room",
   "jacuzzi",
+  "air conditioner",
   "air conditioning",
   "a/c",
   "fitted kitchen",
@@ -306,6 +311,7 @@ let serviceMapForPropertyMarketing = {
   "secured parking": "Secure",
   "parking garage": "Garage",
   "off road parking": "Off Road",
+  "parking off-road": "Off Road",
   "garage parking": "Garage",
   "open sea views": "Open Sea", //Property View
   "valley views": "Valley",
@@ -1379,7 +1385,6 @@ module.exports = async (fastify, opts) => {
     // });
 
     let updatedCRMData = [];
-
     let returnData = [];
     console.log(xmlProperties.length);
 
@@ -1434,6 +1439,7 @@ module.exports = async (fastify, opts) => {
 
           updatedCRMJSON[crmApiKey] =
             options[valueFromXML?._text || valueFromXML] || "Pending";
+
           return;
         }
         if (key === "energy_rating.emissions") {
@@ -1714,7 +1720,10 @@ module.exports = async (fastify, opts) => {
         value =
           serviceMapForPropertyMarketing?.[itm?._text.toLowerCase()] || value;
         // console.log({ crmApiKey, xmlVal: itm._text, value });
-        if (valueFromCRM == value) return;
+
+        if (valueFromCRM == value) {
+          return;
+        }
 
         updatedCRMJSON[crmApiKey] = value;
       });
@@ -1733,9 +1742,9 @@ module.exports = async (fastify, opts) => {
             }) +
             "</property>",
           Properties: crmJSON?.[referenceKey]?.["id"],
-          Original_JSON: JSON.stringify(crmJSON?.[referenceKey]),
-          Update_Status: "Pending",
-          XML_Source: "homeespananewbuild",
+          // Original_JSON: JSON.stringify(crmJSON?.[referenceKey]),
+          // Update_Status: "Pending",
+          // XML_Source: "homeespananewbuild",
         });
         if (test != true) {
           if (updatedCRMData.length == 100) {
@@ -1774,8 +1783,10 @@ module.exports = async (fastify, opts) => {
 
     // return returnData;
     return {
-      returnData,
-      // updatedCRMData,
+      // returnData,
+      // xmlProperties,
+      updatedCRMData,
+
       // xmlPropertiesLength: xmlProperties.length,
       // XML_Data: updatedCRMData.map((item) => item.XML_Data),
       // updatedCRMData: updatedCRMData.map((item) =>
