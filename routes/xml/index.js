@@ -2,7 +2,7 @@ const convert = require("xml-js");
 // const xmlProperties = require("./xmlproperties.json");
 // const crmJSON = require("./crmjson.json");
 const fs = require("fs");
-const test = false;
+const test = true;
 let propertyFieldMapping = {
   id: "PID_Old",
   ref: "Internal_Reference",
@@ -1386,6 +1386,7 @@ module.exports = async (fastify, opts) => {
 
     let updatedCRMData = [];
     let returnData = [];
+    const types = [];
     console.log(xmlProperties.length);
 
     for (const xmlJSON of xmlProperties) {
@@ -1548,6 +1549,10 @@ module.exports = async (fastify, opts) => {
             APARTMENTS: "Apartment",
             APARTMENT: "Apartment",
             "APARTMENT / FLAT": "Apartment",
+            "SEMI-DETACHED": "Villa",
+            "SEMI-DETACHED VILLA": "Villa",
+            QUAD: "Villa",
+            TERRACED: "Townhouse",
           };
           const value = valueFromXML?._text || valueFromXML;
 
@@ -1563,8 +1568,10 @@ module.exports = async (fastify, opts) => {
           //   console.log("inside", { key, value, isFound });
           // }
           if (!isFound) {
+            console.log("key:type", { value });
             return;
           }
+          types.push({ [crmApiKey]: isFound });
           updatedCRMJSON[crmApiKey] = isFound;
           return;
         }
@@ -1785,7 +1792,8 @@ module.exports = async (fastify, opts) => {
     return {
       // returnData,
       // xmlProperties,
-      updatedCRMData,
+      types,
+      // updatedCRMData,
 
       // xmlPropertiesLength: xmlProperties.length,
       // XML_Data: updatedCRMData.map((item) => item.XML_Data),
