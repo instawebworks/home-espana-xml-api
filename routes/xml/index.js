@@ -1386,7 +1386,7 @@ module.exports = async (fastify, opts) => {
 
     let updatedCRMData = [];
     let returnData = [];
-    const types = [];
+
     console.log(xmlProperties.length);
 
     for (const xmlJSON of xmlProperties) {
@@ -1572,7 +1572,7 @@ module.exports = async (fastify, opts) => {
             console.log("key:type", { value });
             return;
           }
-          types.push({ [crmApiKey]: isFound });
+
           updatedCRMJSON[crmApiKey] = isFound;
           return;
         }
@@ -1750,9 +1750,9 @@ module.exports = async (fastify, opts) => {
             }) +
             "</property>",
           Properties: crmJSON?.[referenceKey]?.["id"],
-          // Original_JSON: JSON.stringify(crmJSON?.[referenceKey]),
-          // Update_Status: "Pending",
-          // XML_Source: "homeespananewbuild",
+          Original_JSON: JSON.stringify(crmJSON?.[referenceKey]),
+          Update_Status: "Pending",
+          XML_Source: "homeespananewbuild",
         });
         if (test != true) {
           if (updatedCRMData.length == 100) {
@@ -1791,11 +1791,9 @@ module.exports = async (fastify, opts) => {
 
     // return returnData;
     return {
-      // returnData,
+      returnData,
       // xmlProperties,
-      types,
       // updatedCRMData,
-
       // xmlPropertiesLength: xmlProperties.length,
       // XML_Data: updatedCRMData.map((item) => item.XML_Data),
       // updatedCRMData: updatedCRMData.map((item) =>
