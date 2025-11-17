@@ -2,7 +2,7 @@ const convert = require("xml-js");
 // const xmlProperties = require("./xmlproperties.json");
 // const crmJSON = require("./crmjson.json");
 const fs = require("fs");
-const test = true;
+const test = false;
 let propertyFieldMapping = {
   id: "PID_Old",
   ref: "Internal_Reference",
