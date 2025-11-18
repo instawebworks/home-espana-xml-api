@@ -89,7 +89,9 @@ let propertyMarketingFieldMapping = {
   "surface_area.built": "Size_Build_m2",
   "surface_area.plot": "Size_Land_m2",
   "energy_rating.consumption": "Consumptions",
+  consumption: "Consumptions",
   "energy_rating.emissions": "Emissions",
+  emissions: "Emissions",
   "url.en": "Link",
   video_url: "Youtube_Video_Code",
   "communal pool": "Swimming_Pool",
@@ -274,7 +276,6 @@ let propertyMarketingFeatures = [
   "double glazing",
   "views of pool",
   "alarm",
-
   "sea views",
   "sea view",
   "outdoor kitchen",
@@ -1365,26 +1366,10 @@ module.exports = async (fastify, opts) => {
 
     const rowCount = propIds.length;
 
-    // const allPromise = [];
-    // const perPage = 50;
-    // for (let i = 1; i < rowCount; i += perPage) {
-    //   // console.log(i, "'" + propIds.slice(i - 1, i + 50).join("','") + "'");
-    //   const queryString = `SELECT crm_record_id, crm_json, product_id from properties where  crm_json is not null and product_id in ('${propIds
-    //     .slice(i - 1, i + 50)
-    //     .join("','")}')`;
-    //   allPromise.push(fastify.epDbConn.query(queryString));
-    // }
-    // const allData = await Promise.all(allPromise).then((data) => {
-    //   return data;
-    // });
     let crmJSON = {};
-    // allData.forEach((indvData) => {
-    //   indvData?.rows?.forEach((prop) => {
-    //     crmJSON[prop.product_id] = prop.crm_json;
-    //   });
-    // });
 
     let updatedCRMData = [];
+
     let returnData = [];
 
     console.log(xmlProperties.length);
@@ -1393,7 +1378,6 @@ module.exports = async (fastify, opts) => {
       const property = {};
       const referenceKey = xmlJSON.ref._text;
 
-      // if (!crmJSON[referenceKey]) return;
       Object.keys(xmlJSON).forEach((parent) => {
         if (
           typeof xmlJSON[parent] === "object" &&
@@ -1420,44 +1404,9 @@ module.exports = async (fastify, opts) => {
 
         keys.slice(1).forEach((itm) => {
           valueFromXML = valueFromXML[itm];
-          // console.log({ new: valueFromXML });
         });
-        // if (key == "type._cdata") {
-        //   console.log("outside", { key, valueFromXML });
-        // }
+
         let crmApiKey = propertyMarketingFieldMapping[key.toLowerCase()];
-
-        if (key === "energy_rating.consumption") {
-          const options = {
-            A: "A",
-            B: "B",
-            C: "C",
-            D: "D",
-            E: "E",
-            F: "F",
-            G: "G",
-          };
-
-          updatedCRMJSON[crmApiKey] =
-            options[valueFromXML?._text || valueFromXML] || "Pending";
-
-          return;
-        }
-        if (key === "energy_rating.emissions") {
-          const options = {
-            A: "A",
-            B: "B",
-            C: "C",
-            D: "D",
-            E: "E",
-            F: "F",
-            G: "G",
-          };
-
-          updatedCRMJSON[crmApiKey] =
-            options[valueFromXML?._text || valueFromXML] || "Pending";
-          return;
-        }
 
         if (key === "baths._cdata" || key === "baths") {
           updatedCRMJSON[crmApiKey] = Number(
@@ -1477,16 +1426,6 @@ module.exports = async (fastify, opts) => {
           return;
         }
 
-        //if key is beds._cdata (for bedrooms) and the value of it is not number then we need to change the api key
-        // if (
-        //   (key === "beds._cdata" || key === "beds") &&
-        //   !Number(valueFromXML?._text || valueFromXML)
-        // ) {
-        //   crmApiKey = "Bedroom_Options";
-        // }
-        // "completion__1 - 2 Years": "Completion_old",
-        // "completion__More than 2 years": "Completion_2_old",
-
         // change crmApiKey based on clients requirement (if value from xml is 1 - 2 Years then api key will be Completion_old and if value is More than 2 years)
         if (
           key.split(".")[0] === "completion" &&
@@ -1501,35 +1440,14 @@ module.exports = async (fastify, opts) => {
           crmApiKey =
             propertyMarketingFieldMapping["completion__More than 2 years"];
         }
-        // console.log({
-        //   key,
-        //   crmApiKey,
-        //   valueFromXML: valueFromXML?._text || valueFromXML,
-        // });
+
         if (!crmApiKey) return;
-        // New_Build_Resale
+
         //handle parking based on clients requirement (if 1 then value will be Off Road)
         if (key === "parking" && valueFromXML?._text === "1") {
           updatedCRMJSON[crmApiKey] = "Off Road";
           return;
         }
-        //
-        // if (key === "new_build") {
-        //   new_buiilds.push({
-        //     key: "new_build",
-        //     value: valueFromXML?._text || valueFromXML,
-        //     xmlJSON,
-        //   });
-        // }
-        //handle new_build based on clients requirement (if 1 then value will be New Build)
-        //any other value except 1 wont be included to the updatedCRMJSON
-        // if (key === "new_build" && valueFromXML?._text === "1") {
-        //   updatedCRMJSON[crmApiKey] = "New Build";
-        //   return;
-        // } else if (key === "new_build" && valueFromXML?._text !== "1") {
-        //   updatedCRMJSON[crmApiKey] = "Resale";
-        //   return;
-        // }
 
         //handle type.0 (Type_of_Property) based on clients requirement (if 1 then value will be Off Road)
         if (key === "type._cdata" || key === "type") {
@@ -1557,17 +1475,9 @@ module.exports = async (fastify, opts) => {
           };
           const value = valueFromXML?._text || valueFromXML;
 
-          // console.log({
-          //   key,
-          //   crmApiKey,
-          //   valueFromXML: valueFromXML?._text.toUpperCase(),
-          //   option: map[valueFromXML?._text.toUpperCase()],
-          // });
           // check wheather xml value is found in propertyTypes if fund put it to updatedCRMJSON otherwise do nothing
           const isFound = map[value.toUpperCase()];
-          // if (key == "type._cdata" || key == "type") {
-          //   console.log("inside", { key, value, isFound });
-          // }
+
           if (!isFound) {
             console.log("key:type", { value });
             return;
@@ -1653,6 +1563,50 @@ module.exports = async (fastify, opts) => {
         updatedCRMJSON[crmApiKey] = valueFromXML?._text || valueFromXML;
       });
 
+      if (!xmlJSON?.energy_rating?.consumption?._text) {
+        const crmApiKey = propertyMarketingFieldMapping["consumption"];
+
+        updatedCRMJSON[crmApiKey] = "Pending";
+      }
+      if (xmlJSON?.energy_rating?.consumption?._text) {
+        const crmApiKey = propertyMarketingFieldMapping["consumption"];
+        const value = xmlJSON.energy_rating.consumption._text;
+
+        const options = {
+          A: "A",
+          B: "B",
+          C: "C",
+          D: "D",
+          E: "E",
+          F: "F",
+          G: "G",
+        };
+
+        updatedCRMJSON[crmApiKey] = options[value] || "Pending";
+      }
+
+      if (!xmlJSON?.energy_rating?.emissions?._text) {
+        const crmApiKey = propertyMarketingFieldMapping["emissions"];
+
+        updatedCRMJSON[crmApiKey] = "Pending";
+      }
+      if (xmlJSON?.energy_rating?.emissions?._text) {
+        const crmApiKey = propertyMarketingFieldMapping["emissions"];
+        const value = xmlJSON.energy_rating.emissions._text;
+
+        const options = {
+          A: "A",
+          B: "B",
+          C: "C",
+          D: "D",
+          E: "E",
+          F: "F",
+          G: "G",
+        };
+
+        updatedCRMJSON[crmApiKey] = options[value] || "Pending";
+      }
+
       //we need to process new_build for ecery record thats why we are checking this seperately
       //if new_build tag isn't found then we need to assign Resale
       //if value is 1 then value is "New Build" otherwise "Resale"
@@ -1709,8 +1663,13 @@ module.exports = async (fastify, opts) => {
 
       //handle fatures
       feature?.forEach((itm) => {
-        const crmApiKey =
+        let crmApiKey =
           propertyMarketingFieldMapping?.[itm?._text.toLowerCase()];
+
+        //if itm?._text.toLowerCase() contains central heating then we need to set the crmApiKey Heating
+        if (itm?._text.toLowerCase().includes("central heating")) {
+          crmApiKey = "Heating";
+        }
         // Fitted Kitchen
         if (!crmApiKey) {
           return;
@@ -1719,7 +1678,10 @@ module.exports = async (fastify, opts) => {
 
         let value;
 
-        if (propertyMarketingFeatures.includes(itm?._text.toLowerCase())) {
+        if (
+          propertyMarketingFeatures.includes(itm?._text.toLowerCase()) ||
+          itm?._text.toLowerCase().includes("central heating")
+        ) {
           value = "YES";
         } else {
           value = "NO";
@@ -1791,9 +1753,10 @@ module.exports = async (fastify, opts) => {
 
     // return returnData;
     return {
-      returnData,
+      // returnData,
       // xmlProperties,
-      // updatedCRMData,
+      updatedCRMData,
+      // xmlProperties: xmlProperties,
       // xmlPropertiesLength: xmlProperties.length,
       // XML_Data: updatedCRMData.map((item) => item.XML_Data),
       // updatedCRMData: updatedCRMData.map((item) =>
