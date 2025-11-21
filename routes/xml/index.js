@@ -464,7 +464,7 @@ module.exports = async (fastify, opts) => {
       return data;
     });
     let xml_str =
-      "<?xml version='1.0' encoding='utf-8' standalone='yes'?><root><kyero><feed_version>3</feed_version>";
+      "<?xml version='1.0' encoding='utf-8' standalone='yes'?><root><kyero><feed_version>3</feed_version></kyero>";
 
     allData.forEach((indvData) => {
       indvData?.rows?.forEach((prop) => {
@@ -472,7 +472,7 @@ module.exports = async (fastify, opts) => {
       });
     });
 
-    xml_str += "</kyero></root>";
+    xml_str += "</root>";
 
     xml_str = xml_str.replaceAll("&", "&amp;");
 
@@ -533,7 +533,7 @@ module.exports = async (fastify, opts) => {
       return data;
     });
     let xml_str =
-      "<?xml version='1.0' encoding='utf-8' standalone='yes'?><root><kyero><feed_version>3</feed_version>";
+      "<?xml version='1.0' encoding='utf-8' standalone='yes'?><root><kyero><feed_version>3</feed_version></kyero>";
 
     allData.forEach((indvData) => {
       indvData?.rows?.forEach((prop) => {
@@ -541,7 +541,7 @@ module.exports = async (fastify, opts) => {
       });
     });
 
-    xml_str += "</kyero></root>";
+    xml_str += "</root>";
 
     xml_str = xml_str.replaceAll("&", "&amp;");
 
@@ -603,7 +603,7 @@ module.exports = async (fastify, opts) => {
       return data;
     });
     let xml_str =
-      "<?xml version='1.0' encoding='utf-8' standalone='yes'?><root><kyero><feed_version>3</feed_version>";
+      "<?xml version='1.0' encoding='utf-8' standalone='yes'?><root><kyero><feed_version>3</feed_version></kyero>";
 
     allData.forEach((indvData) => {
       indvData?.rows?.forEach((prop) => {
@@ -611,7 +611,7 @@ module.exports = async (fastify, opts) => {
       });
     });
 
-    xml_str += "</kyero></root>";
+    xml_str += "</root>";
 
     xml_str = xml_str.replaceAll("&", "&amp;");
 
@@ -672,7 +672,7 @@ module.exports = async (fastify, opts) => {
       return data;
     });
     let xml_str =
-      "<?xml version='1.0' encoding='utf-8' standalone='yes'?><root><kyero><feed_version>3</feed_version>";
+      "<?xml version='1.0' encoding='utf-8' standalone='yes'?><root><kyero><feed_version>3</feed_version></kyero>";
 
     allData.forEach((indvData) => {
       indvData?.rows?.forEach((prop) => {
@@ -680,7 +680,7 @@ module.exports = async (fastify, opts) => {
       });
     });
 
-    xml_str += "</kyero></root>";
+    xml_str += "</root>";
 
     xml_str = xml_str.replaceAll("&", "&amp;");
 
@@ -735,7 +735,7 @@ module.exports = async (fastify, opts) => {
       return data;
     });
     let xml_str =
-      "<?xml version='1.0' encoding='utf-8' standalone='yes'?><root><kyero><feed_version>3</feed_version>";
+      "<?xml version='1.0' encoding='utf-8' standalone='yes'?><root><kyero><feed_version>3</feed_version></kyero>";
 
     allData.forEach((indvData) => {
       indvData?.rows?.forEach((prop) => {
@@ -743,7 +743,7 @@ module.exports = async (fastify, opts) => {
       });
     });
 
-    xml_str += "</kyero></root>";
+    xml_str += "</root>";
 
     xml_str = xml_str.replaceAll("&", "&amp;");
 
@@ -941,8 +941,7 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${
-              index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1241,8 +1240,7 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${
-              index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1523,10 +1521,10 @@ module.exports = async (fastify, opts) => {
 
           const value =
             serviceMapForPropertyMarketing[
-              isPrivatePoolFound?._text.toLowerCase()
+            isPrivatePoolFound?._text.toLowerCase()
             ] ||
             serviceMapForPropertyMarketing[
-              isCommunalPoolFound?._text.toLowerCase()
+            isCommunalPoolFound?._text.toLowerCase()
             ] ||
             poolValueBasedOnPropertyType;
 
@@ -1648,8 +1646,7 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${
-              index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
