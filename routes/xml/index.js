@@ -1751,7 +1751,7 @@ module.exports = async (fastify, opts) => {
       }
     }
 
-    // return returnData;
+    return returnData;
     return {
       // returnData,
       // xmlProperties,
