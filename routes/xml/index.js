@@ -1765,7 +1765,7 @@ module.exports = async (fastify, opts) => {
     };
   });
 
-  fastify.get("/fetchpropertyids", async (request, reply) => {
+  fastify.get("/fetchpropertyidsmarketing", async (request, reply) => {
     // get compact xml data
     const accessTokenResp = await fastify.axios(
       process.env.SANDBOX_ACCESS_TOKEN_URL
@@ -1810,6 +1810,42 @@ module.exports = async (fastify, opts) => {
         prefix = "NCB-42";
       }
       propIds.push(prefix + referenceKey);
+    });
+
+    return propIds;
+  });
+  fastify.get("/fetchpropertyidsproduction", async (request, reply) => {
+    // get compact xml data
+    const accessTokenResp = await fastify.axios(
+      process.env.SANDBOX_ACCESS_TOKEN_URL
+    );
+    const accessToken = accessTokenResp?.data?.accessToken || "";
+
+    if (accessToken == "") {
+      return {
+        data: null,
+        error:
+          "Issue in getting Access Token, please contact with Administrator",
+      };
+    }
+
+    const url =
+      "https://homeespananewbuild.com/wp-load.php?security_key=03640df25fbe2b01&export_id=7&action=get_data";
+
+    const response = await fetch(url);
+    const xmlResponse = await response.text();
+
+    var convertToJSON = convert.xml2json(xmlResponse, {
+      compact: true,
+      spaces: 2,
+    });
+    const xmlProperties = JSON.parse(convertToJSON).root.property;
+
+    let propIds = [];
+    xmlProperties.forEach((xmlJSON) => {
+      const referenceKey = xmlJSON.ref._text;
+
+      propIds.push(referenceKey);
     });
 
     return propIds;
