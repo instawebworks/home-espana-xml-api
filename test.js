@@ -13,4 +13,5 @@ sortable2 = sortable2.sort((a, b) => a.localeCompare(b));
 
 if (JSON.stringify(sortable) == JSON.stringify(sortable2)) {
   // console.log("equal");
+  // 
 }
