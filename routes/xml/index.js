@@ -941,7 +941,8 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1240,7 +1241,8 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1521,10 +1523,10 @@ module.exports = async (fastify, opts) => {
 
           const value =
             serviceMapForPropertyMarketing[
-            isPrivatePoolFound?._text.toLowerCase()
+              isPrivatePoolFound?._text.toLowerCase()
             ] ||
             serviceMapForPropertyMarketing[
-            isCommunalPoolFound?._text.toLowerCase()
+              isCommunalPoolFound?._text.toLowerCase()
             ] ||
             poolValueBasedOnPropertyType;
 
@@ -1646,7 +1648,8 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1752,13 +1755,48 @@ module.exports = async (fastify, opts) => {
     return {
       // returnData,
       // xmlProperties,
-      updatedCRMData,
-      // xmlProperties: xmlProperties,
+      // updatedCRMData,
+      xmlProperties: xmlProperties,
       // xmlPropertiesLength: xmlProperties.length,
       // XML_Data: updatedCRMData.map((item) => item.XML_Data),
       // updatedCRMData: updatedCRMData.map((item) =>
       //   JSON.parse(item.Update_Json)
       // ),
     };
+  });
+
+  fastify.get("/fetchpropertyids", async (request, reply) => {
+    // get compact xml data
+    const accessTokenResp = await fastify.axios(
+      process.env.SANDBOX_ACCESS_TOKEN_URL
+    );
+    const accessToken = accessTokenResp?.data?.accessToken || "";
+
+    if (accessToken == "") {
+      return {
+        data: null,
+        error:
+          "Issue in getting Access Token, please contact with Administrator",
+      };
+    }
+
+    const url =
+      "https://www.propertyportalmarketing.com/xml/homeespana-merge-5.xml";
+
+    const response = await fetch(url);
+    const xmlResponse = await response.text();
+
+    var convertToJSON = convert.xml2json(xmlResponse, {
+      compact: true,
+      spaces: 2,
+    });
+    const xmlProperties = JSON.parse(convertToJSON).root.property;
+
+    let propIds = [];
+    xmlProperties.forEach((indv) => {
+      propIds.push(indv?.id?._text);
+    });
+
+    return propIds;
   });
 };
