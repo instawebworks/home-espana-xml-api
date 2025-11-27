@@ -1793,8 +1793,23 @@ module.exports = async (fastify, opts) => {
     const xmlProperties = JSON.parse(convertToJSON).root.property;
 
     let propIds = [];
-    xmlProperties.forEach((indv) => {
-      propIds.push(indv?.id?._text);
+    xmlProperties.forEach((xmlJSON) => {
+      const feed_agent_value = xmlJSON.feed_agent._text;
+      const referenceKey = xmlJSON.ref._text;
+
+      let prefix;
+      if (feed_agent_value === "Villas Amarillas") {
+        prefix = "HE-16";
+      } else if (feed_agent_value === "Sun Villas Murcia") {
+        prefix = "MH-30";
+      } else if (feed_agent_value === "Daimper International") {
+        prefix = "NCB-66";
+      } else if (feed_agent_value === "Orange villas") {
+        prefix = "NCB-07";
+      } else if (feed_agent_value === "Plus villas") {
+        prefix = "NCB-42";
+      }
+      propIds.push(prefix + referenceKey);
     });
 
     return propIds;
