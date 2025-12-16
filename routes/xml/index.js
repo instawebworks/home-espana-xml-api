@@ -442,7 +442,7 @@ module.exports = async (fastify, opts) => {
       "BVCA.H416",
       "BVMT.H747",
     ];
-    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status = 'Sold By HomeEspana') and product_id not in ('${skip_product_ids.join(
+    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status = 'Sold By HomeEspana' or status = 'Sold by HomeEspana') and product_id not in ('${skip_product_ids.join(
       "','"
     )}') `;
 
@@ -455,7 +455,7 @@ module.exports = async (fastify, opts) => {
     const allPromise = [];
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
-      const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status = 'Sold By HomeEspana') and product_id not in ('${skip_product_ids.join(
+      const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status = 'Sold By HomeEspana' or status = 'Sold by HomeEspana') and product_id not in ('${skip_product_ids.join(
         "','"
       )}')  limit ${perPage} offset ${i - 1}`;
       allPromise.push(fastify.epDbConn.query(queryString));
@@ -507,7 +507,7 @@ module.exports = async (fastify, opts) => {
       "BVCA.H416",
       "BVMT.H747",
     ];
-    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA'  or status = 'Sold By HomeEspana') and product_id like 'NCB%' and product_id not like 'NCBKP%' and product_id not in ('${skip_product_ids.join(
+    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA'  or status = 'Sold By HomeEspana' or status = 'Sold by HomeEspana') and product_id like 'NCB%' and product_id not like 'NCBKP%' and product_id not in ('${skip_product_ids.join(
       "','"
     )}') `;
 
@@ -523,7 +523,7 @@ module.exports = async (fastify, opts) => {
     const allPromise = [];
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
-      const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA'  or status = 'Sold By HomeEspana') and product_id like 'NCB%' and product_id not like 'NCBKP%' and product_id not in ('${skip_product_ids.join(
+      const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA'  or status = 'Sold By HomeEspana' or status = 'Sold by HomeEspana') and product_id like 'NCB%' and product_id not like 'NCBKP%' and product_id not in ('${skip_product_ids.join(
         "','"
       )}')  limit ${perPage} offset ${i - 1}`;
       allPromise.push(fastify.epDbConn.query(queryString));
@@ -575,7 +575,7 @@ module.exports = async (fastify, opts) => {
       "BVCA.H416",
       "BVMT.H747",
     ];
-    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status = 'Sold By HomeEspana') and product_id like 'VLC%' and product_id not like 'VLCKP%' and product_id not in ('${skip_product_ids.join(
+    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status = 'Sold By HomeEspana' or status = 'Sold by HomeEspana') and product_id like 'VLC%' and product_id not like 'VLCKP%' and product_id not in ('${skip_product_ids.join(
       "','"
     )}') `;
     console.log(queryString);
@@ -592,7 +592,7 @@ module.exports = async (fastify, opts) => {
     const allPromise = [];
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
-      const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status = 'Sold By HomeEspana' ) and product_id like 'VLC%' and product_id not like 'VLCKP%' and product_id not in ('${skip_product_ids.join(
+      const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status = 'Sold By HomeEspana' or status = 'Sold by HomeEspana') and product_id like 'VLC%' and product_id not like 'VLCKP%' and product_id not in ('${skip_product_ids.join(
         "','"
       )}')  limit ${perPage} offset ${i - 1}`;
 
@@ -645,7 +645,7 @@ module.exports = async (fastify, opts) => {
       "BVCA.H416",
       "BVMT.H747",
     ];
-    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA'  or status = 'Sold By HomeEspana' ) and (product_id like 'HE%' or product_id like 'MH%') and product_id not like 'HEKP%' and product_id not like 'MHKP%' and product_id not in ('${skip_product_ids.join(
+    const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA'  or status = 'Sold By HomeEspana' or status = 'Sold by HomeEspana' ) and (product_id like 'HE%' or product_id like 'MH%') and product_id not like 'HEKP%' and product_id not like 'MHKP%' and product_id not in ('${skip_product_ids.join(
       "','"
     )}') `;
     console.log({ queryString });
@@ -662,7 +662,7 @@ module.exports = async (fastify, opts) => {
     const allPromise = [];
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
-      const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA'  or status = 'Sold By HomeEspana') and (product_id like 'HE%' or product_id like 'MH%') and product_id not like 'HEKP%' and product_id not like 'MHKP%' and product_id not in ('${skip_product_ids.join(
+      const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA'  or status = 'Sold By HomeEspana' or status = 'Sold by HomeEspana') and (product_id like 'HE%' or product_id like 'MH%') and product_id not like 'HEKP%' and product_id not like 'MHKP%' and product_id not in ('${skip_product_ids.join(
         "','"
       )}')  limit ${perPage} offset ${i - 1}`;
       allPromise.push(fastify.epDbConn.query(queryString));
@@ -941,8 +941,7 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${
-              index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1241,8 +1240,7 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${
-              index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1523,10 +1521,10 @@ module.exports = async (fastify, opts) => {
 
           const value =
             serviceMapForPropertyMarketing[
-              isPrivatePoolFound?._text.toLowerCase()
+            isPrivatePoolFound?._text.toLowerCase()
             ] ||
             serviceMapForPropertyMarketing[
-              isCommunalPoolFound?._text.toLowerCase()
+            isCommunalPoolFound?._text.toLowerCase()
             ] ||
             poolValueBasedOnPropertyType;
 
@@ -1648,8 +1646,7 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${
-              index !== xmlImageList.length - 1 ? "\n" : ""
+            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
             }`
         )
         .join("");
@@ -1714,7 +1711,7 @@ module.exports = async (fastify, opts) => {
           Properties: crmJSON?.[referenceKey]?.["id"],
           Original_JSON: JSON.stringify(crmJSON?.[referenceKey]),
           Update_Status: "Pending",
-          XML_Source: "homeespananewbuild",
+          XML_Source: "propertyportalmarketing",
         });
         if (test != true) {
           if (updatedCRMData.length == 100) {
