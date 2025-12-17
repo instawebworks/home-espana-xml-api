@@ -1333,7 +1333,7 @@ module.exports = async (fastify, opts) => {
   fastify.get("/syncpropertyportalmarketing", async (request, reply) => {
     // get compact xml data
     const accessTokenResp = await fastify.axios(
-      process.env.SANDBOX_ACCESS_TOKEN_URL
+      process.env.ACCESS_TOKEN_URL
     );
     const accessToken = accessTokenResp?.data?.accessToken || "";
 
@@ -1717,7 +1717,7 @@ module.exports = async (fastify, opts) => {
           if (updatedCRMData.length == 100) {
             try {
               const ress = await fastify.axios({
-                url: "https://sandbox.zohoapis.eu/crm/v7/Property_Update_Log",
+                url: "https://www.zohoapis.eu/crm/v7/Property_Update_Log",
                 data: { data: updatedCRMData },
                 headers: { Authorization: accessToken },
                 method: "POST",
@@ -1736,7 +1736,7 @@ module.exports = async (fastify, opts) => {
       if (updatedCRMData.length > 0) {
         try {
           const ress = await fastify.axios({
-            url: "https://sandbox.zohoapis.eu/crm/v7/Property_Update_Log",
+            url: "https://www.zohoapis.eu/crm/v7/Property_Update_Log",
             data: { data: updatedCRMData },
             headers: { Authorization: accessToken },
             method: "POST",
@@ -1765,7 +1765,7 @@ module.exports = async (fastify, opts) => {
   fastify.get("/fetchpropertyidsmarketing", async (request, reply) => {
     // get compact xml data
     const accessTokenResp = await fastify.axios(
-      process.env.SANDBOX_ACCESS_TOKEN_URL
+      process.env.ACCESS_TOKEN_URL
     );
     const accessToken = accessTokenResp?.data?.accessToken || "";
 
@@ -1814,7 +1814,7 @@ module.exports = async (fastify, opts) => {
   fastify.get("/fetchpropertyidsproduction", async (request, reply) => {
     // get compact xml data
     const accessTokenResp = await fastify.axios(
-      process.env.SANDBOX_ACCESS_TOKEN_URL
+      process.env.ACCESS_TOKEN_URL
     );
     const accessToken = accessTokenResp?.data?.accessToken || "";
 
