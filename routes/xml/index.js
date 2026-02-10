@@ -1753,8 +1753,8 @@ module.exports = async (fastify, opts) => {
       // returnData,
       // xmlProperties,
       // updatedCRMData,
-      xmlProperties: xmlProperties,
-      // xmlPropertiesLength: xmlProperties.length,
+      // xmlProperties: xmlProperties,
+      xmlPropertiesLength: xmlProperties.length,
       // XML_Data: updatedCRMData.map((item) => item.XML_Data),
       // updatedCRMData: updatedCRMData.map((item) =>
       //   JSON.parse(item.Update_Json)
