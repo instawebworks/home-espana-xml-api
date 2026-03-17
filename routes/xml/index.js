@@ -1641,7 +1641,7 @@ module.exports = async (fastify, opts) => {
       });
 
       crmImageList = crmImageList.sort((a, b) => a.localeCompare(b));
-      xmlImageList = xmlImageList.sort((a, b) => a.localeCompare(b));
+      // xmlImageList = xmlImageList.sort((a, b) => a.localeCompare(b));
 
       let updatedImageList = xmlImageList
         .map(
