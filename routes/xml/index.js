@@ -2,7 +2,7 @@ const convert = require("xml-js");
 // const xmlProperties = require("./xmlproperties.json");
 // const crmJSON = require("./crmjson.json");
 const fs = require("fs");
-const test = false;
+const test = true;
 let propertyFieldMapping = {
   id: "PID_Old",
   ref: "Internal_Reference",
@@ -1755,6 +1755,412 @@ module.exports = async (fastify, opts) => {
       // updatedCRMData: updatedCRMData.map((item) =>
       //   JSON.parse(item.Update_Json)
       // ),
+    };
+  });
+
+  fastify.get("/syncpropertiesurbimed", async (request, reply) => {
+    // get compact xml data
+    const accessTokenResp = await fastify.axios(
+      process.env.ACCESS_TOKEN_URL
+    );
+    const accessToken = accessTokenResp?.data?.accessToken || "";
+
+    if (accessToken == "") {
+      return {
+        data: null,
+        error:
+          "Issue in getting Access Token, please contact with Administrator",
+      };
+    }
+
+    const url =
+      "https://www.urbimed.com/feed/kyero/ver/home-espana-real-estate/";
+
+    const response = await fetch(url);
+    const xmlResponse = await response.text();
+
+    var convertToJSON = convert.xml2json(xmlResponse, {
+      compact: true,
+      spaces: 2,
+    });
+    const xmlProperties = JSON.parse(convertToJSON).root.property;
+
+    let propIds = [];
+    xmlProperties.forEach((indv) => {
+      propIds.push(indv?.ref?._text);
+    });
+
+    const rowCount = propIds.length;
+
+    let crmJSON = {};
+
+    let updatedCRMData = [];
+
+    let returnData = [];
+
+    console.log(xmlProperties.length);
+
+    const URBIMED_PREFIX = "NCBK-01";
+
+    for (const xmlJSON of xmlProperties) {
+      // Client requirement: skip any property that has no price
+      const priceText =
+        xmlJSON?.price?._text ?? xmlJSON?.price?._cdata ?? "";
+      const priceNumber = Number(String(priceText).replace(/[^\d.-]/g, ""));
+      if (!priceText || String(priceText).trim() === "" || !priceNumber) {
+        continue;
+      }
+
+      const property = {};
+      const referenceKey = xmlJSON.ref._text;
+
+      Object.keys(xmlJSON).forEach((parent) => {
+        if (
+          typeof xmlJSON[parent] === "object" &&
+          !currentSituationsOfProperty.includes(parent)
+        ) {
+          const children = Object.keys(xmlJSON[parent]);
+          children.forEach((child) => {
+            if (child !== "_text") {
+              property[`${parent}.${child}`] = `${parent}.${child}`;
+            } else {
+              property[parent] = parent;
+            }
+          });
+        }
+      });
+
+      const updatedCRMJSON = {};
+
+      // handle keys except desc,features,images
+      Object.keys(property).forEach((key) => {
+        const keys = key.split(".");
+        let valueFromXML = xmlJSON[keys[0]];
+
+        keys.slice(1).forEach((itm) => {
+          valueFromXML = valueFromXML[itm];
+        });
+
+        let crmApiKey = propertyMarketingFieldMapping[key.toLowerCase()];
+
+        if (key === "baths._cdata" || key === "baths") {
+          updatedCRMJSON[crmApiKey] = Number(
+            (valueFromXML?._text || valueFromXML).slice(0, 1)
+          );
+          updatedCRMJSON["Bathroom_Options"] =
+            valueFromXML?._text || valueFromXML;
+          return;
+        }
+
+        if (key === "beds._cdata" || key === "beds") {
+          updatedCRMJSON[crmApiKey] = Number(
+            (valueFromXML?._text || valueFromXML).slice(0, 1)
+          );
+          updatedCRMJSON["Bedroom_Options"] =
+            valueFromXML?._text || valueFromXML;
+          return;
+        }
+
+        // change crmApiKey based on clients requirement (if value from xml is 1 - 2 Years then api key will be Completion_old and if value is More than 2 years)
+        if (
+          key.split(".")[0] === "completion" &&
+          valueFromXML?._text === "1 - 2 Years"
+        ) {
+          crmApiKey = propertyMarketingFieldMapping["completion__1 - 2 Years"];
+        }
+        if (
+          key.split(".")[0] === "completion" &&
+          valueFromXML?._text === "More than 2 years"
+        ) {
+          crmApiKey =
+            propertyMarketingFieldMapping["completion__More than 2 years"];
+        }
+
+        if (!crmApiKey) return;
+
+        //handle parking based on clients requirement (if 1 then value will be Off Road)
+        if (key === "parking" && valueFromXML?._text === "1") {
+          updatedCRMJSON[crmApiKey] = "Off Road";
+          return;
+        }
+
+        //handle type.0 (Type_of_Property) based on clients requirement
+        if (key === "type._cdata" || key === "type") {
+          const map = {
+            "DETACHED VILLA": "Villa",
+            PLOT: "Land",
+            VILLA: "Villa",
+            VILLAS: "Villa",
+            DUPLEX: "Apartment",
+            "TOWN HOUSE": "Townhouse",
+            TOWNHOUSE: "Townhouse",
+            "COMMERCIAL PROPERTY": "Commercial",
+            "COMMERCIAL SPACE": "Commercial",
+            "STUDIO APARTMENT": "Studio Apartment",
+            "PARKING – GARAGE": "None",
+            BUNGALOW: "Bungalow",
+            APARTMENTS: "Apartment",
+            APARTMENT: "Apartment",
+            "APARTMENT / FLAT": "Apartment",
+            "SEMI-DETACHED": "Villa",
+            "SEMI-DETACHED VILLA": "Villa",
+            QUAD: "Villa",
+            TERRACED: "Townhouse",
+          };
+          const value = valueFromXML?._text || valueFromXML;
+
+          const isFound = map[value.toUpperCase()];
+
+          if (!isFound) {
+            console.log("key:type", { value });
+            return;
+          }
+
+          updatedCRMJSON[crmApiKey] = isFound;
+          return;
+        }
+
+        //if crm key is Area add '- ' before value
+        if (key === "town" && crmApiKey === "Area") {
+          updatedCRMJSON[crmApiKey] =
+            "- " + valueFromXML?._text || valueFromXML;
+          return;
+        }
+        //handle pool
+        if (key === "pool") {
+          const feature = [xmlJSON?.["features"]?.["feature"] || []].flat();
+          const isPrivatePoolFound = feature.find(
+            (itm) =>
+              itm?._text.toLowerCase().includes("pool") &&
+              itm?._text.toLowerCase().includes("private")
+          );
+          const isCommunalPoolFound = feature.find(
+            (itm) =>
+              itm?._text.toLowerCase().includes("pool") &&
+              itm?._text.toLowerCase().includes("communal")
+          );
+
+          const propertyType = property?.["type"] || property?.["type._cdata"];
+          const propertyValue =
+            propertyType == "type._cdata"
+              ? xmlJSON["type"]._cdata
+              : xmlJSON["type"]._text;
+
+          const poolValueBasedOnPropertyType = propertyValue
+            .toLowerCase()
+            .includes("villa")
+            ? "Private"
+            : "Communal";
+
+          const value =
+            serviceMapForPropertyMarketing[
+            isPrivatePoolFound?._text.toLowerCase()
+            ] ||
+            serviceMapForPropertyMarketing[
+            isCommunalPoolFound?._text.toLowerCase()
+            ] ||
+            poolValueBasedOnPropertyType;
+
+          updatedCRMJSON[crmApiKey] = value;
+          return;
+        }
+
+        try {
+          if (valueFromXML._text == crmJSON[referenceKey][crmApiKey]) {
+            // If Matches Return
+            return;
+          }
+        } catch (err) {
+          // console.log(crmApiKey, crmJSON[referenceKey][crmApiKey], err.message);
+        }
+        updatedCRMJSON[crmApiKey] = valueFromXML?._text || valueFromXML;
+      });
+
+      if (!xmlJSON?.energy_rating?.consumption?._text) {
+        const crmApiKey = propertyMarketingFieldMapping["consumption"];
+
+        updatedCRMJSON[crmApiKey] = "Pending";
+      }
+      if (xmlJSON?.energy_rating?.consumption?._text) {
+        const crmApiKey = propertyMarketingFieldMapping["consumption"];
+        const value = xmlJSON.energy_rating.consumption._text;
+
+        const options = {
+          A: "A",
+          B: "B",
+          C: "C",
+          D: "D",
+          E: "E",
+          F: "F",
+          G: "G",
+        };
+
+        updatedCRMJSON[crmApiKey] = options[value] || "Pending";
+      }
+
+      if (!xmlJSON?.energy_rating?.emissions?._text) {
+        const crmApiKey = propertyMarketingFieldMapping["emissions"];
+
+        updatedCRMJSON[crmApiKey] = "Pending";
+      }
+      if (xmlJSON?.energy_rating?.emissions?._text) {
+        const crmApiKey = propertyMarketingFieldMapping["emissions"];
+        const value = xmlJSON.energy_rating.emissions._text;
+
+        const options = {
+          A: "A",
+          B: "B",
+          C: "C",
+          D: "D",
+          E: "E",
+          F: "F",
+          G: "G",
+        };
+
+        updatedCRMJSON[crmApiKey] = options[value] || "Pending";
+      }
+
+      //if new_build tag isn't found then we need to assign Resale
+      //if value is 1 then value is "New Build" otherwise "Resale"
+      if (!xmlJSON.new_build) {
+        const crmApiKey = propertyMarketingFieldMapping["new_build"];
+
+        updatedCRMJSON[crmApiKey] = "Resale";
+      }
+
+      if (xmlJSON.new_build) {
+        const crmApiKey = propertyMarketingFieldMapping["new_build"];
+        const value = xmlJSON.new_build._text || xmlJSON.new_build;
+
+        updatedCRMJSON[crmApiKey] = value == 1 ? "New Build" : "Resale";
+      }
+      //handle images
+      const imagesFromCRM = crmJSON?.[referenceKey]?.["Photos"]
+        ?.split("\n")
+        ?.map((pic) => pic.split("-")[1].trim());
+      const imagesFromXML = [xmlJSON["images"]?.["image"] || []]
+        .flat()
+        .map((img) => img.url._text);
+
+      let crmImageList = [];
+
+      let xmlImageList = [];
+
+      imagesFromCRM?.forEach((imgUrl) => {
+        crmImageList.push(imgUrl);
+      });
+
+      imagesFromXML?.forEach((imgUrl) => {
+        xmlImageList.push(imgUrl);
+      });
+
+      crmImageList = crmImageList.sort((a, b) => a.localeCompare(b));
+
+      let updatedImageList = xmlImageList
+        .map(
+          (img, index) =>
+            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
+            }`
+        )
+        .join("");
+
+      updatedCRMJSON[propertyMarketingFieldMapping["images.image"]] =
+        updatedImageList;
+
+      //convert feature to array
+      const feature = [xmlJSON?.["features"]?.["feature"] || []].flat();
+
+      //handle features
+      feature?.forEach((itm) => {
+        let crmApiKey =
+          propertyMarketingFieldMapping?.[itm?._text.toLowerCase()];
+
+        if (itm?._text.toLowerCase().includes("central heating")) {
+          crmApiKey = "Heating";
+        }
+        if (!crmApiKey) {
+          return;
+        }
+        const valueFromCRM = crmJSON?.[referenceKey]?.[crmApiKey];
+
+        let value;
+
+        if (
+          propertyMarketingFeatures.includes(itm?._text.toLowerCase()) ||
+          itm?._text.toLowerCase().includes("central heating")
+        ) {
+          value = "YES";
+        } else {
+          value = "NO";
+        }
+
+        value =
+          serviceMapForPropertyMarketing?.[itm?._text.toLowerCase()] || value;
+
+        if (valueFromCRM == value) {
+          return;
+        }
+
+        updatedCRMJSON[crmApiKey] = value;
+      });
+
+      // Client requirement: attach NCBK-01 prefix to Urbimed product reference
+      updatedCRMJSON[propertyMarketingFieldMapping["feed_agent"]] =
+        URBIMED_PREFIX + referenceKey;
+
+      if (Object.keys(updatedCRMJSON).length > 0) {
+        updatedCRMJSON.Agent_Property = true;
+        updatedCRMData.push({
+          Update_Json: JSON.stringify(updatedCRMJSON),
+          XML_Data:
+            "<property>" +
+            convert.json2xml(xmlJSON, {
+              compact: true,
+              spaces: 2,
+            }) +
+            "</property>",
+          Properties: crmJSON?.[referenceKey]?.["id"],
+          Original_JSON: JSON.stringify(crmJSON?.[referenceKey]),
+          Update_Status: "Pending",
+          XML_Source: "urbimed",
+        });
+        if (test != true) {
+          if (updatedCRMData.length == 100) {
+            try {
+              const ress = await fastify.axios({
+                url: "https://www.zohoapis.eu/crm/v7/Property_Update_Log",
+                data: { data: updatedCRMData },
+                headers: { Authorization: accessToken },
+                method: "POST",
+              });
+              returnData.push(ress?.data?.data);
+            } catch (error) {
+              // console.log({ error });
+            }
+            updatedCRMData = [];
+          }
+        }
+      }
+    }
+
+    if (test != true) {
+      if (updatedCRMData.length > 0) {
+        try {
+          const ress = await fastify.axios({
+            url: "https://www.zohoapis.eu/crm/v7/Property_Update_Log",
+            data: { data: updatedCRMData },
+            headers: { Authorization: accessToken },
+            method: "POST",
+          });
+          returnData.push(ress?.data?.data);
+        } catch (error) {
+          // console.log({ error });
+        }
+      }
+    }
+
+    return {
+      xmlPropertiesLength: updatedCRMData,
     };
   });
 
