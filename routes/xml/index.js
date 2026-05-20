@@ -317,6 +317,18 @@ let serviceMapForPropertyMarketing = {
   "one-floor": "Property on 1 level",
 };
 
+let urbimedFeatureMap = {
+  "air conditioning air conditioning hot/cold ducts": "Air_Con",
+  "heating electric underfloor heating with heat pump": "Underfloor_Heating",
+  "open terrace": "Open_Terrace",
+  "covered terrace": "Covered_Terrace",
+  "doble glazing": "Double_glazing",
+  "security door": "Security_Door",
+  laundry: "Utility_Room",
+  garage: "Garage",
+  barbacue: "BBQ",
+};
+
 module.exports = async (fastify, opts) => {
   // define the about route
   fastify.get("/properties/:productid", async (request, reply) => {
@@ -370,18 +382,17 @@ module.exports = async (fastify, opts) => {
       "BVMT.H747",
     ];
     const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and product_id not in ('${skip_product_ids.join(
-      "','"
+      "','",
     )}') `;
 
-    const { rows: totalCount, fields } = await fastify.epDbConn.query(
-      queryString
-    );
+    const { rows: totalCount, fields } =
+      await fastify.epDbConn.query(queryString);
     const rowCount = totalCount?.[0]?.count || 0;
     const allPromise = [];
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
       const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and product_id not in ('${skip_product_ids.join(
-        "','"
+        "','",
       )}')  limit ${perPage} offset ${i - 1}`;
       allPromise.push(fastify.epDbConn.query(queryString));
     }
@@ -416,7 +427,7 @@ module.exports = async (fastify, opts) => {
       `sync_properties`,
       xml_str,
       "EX",
-      600000
+      600000,
     );
     return resp;
   });
@@ -439,12 +450,11 @@ module.exports = async (fastify, opts) => {
       "BVMT.H747",
     ];
     const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status = 'Sold By HomeEspana' or status = 'Sold by HomeEspana') and product_id not in ('${skip_product_ids.join(
-      "','"
+      "','",
     )}') `;
 
-    const { rows: totalCount, fields } = await fastify.epDbConn.query(
-      queryString
-    );
+    const { rows: totalCount, fields } =
+      await fastify.epDbConn.query(queryString);
 
     const rowCount = totalCount?.[0]?.count || 0;
     console.log({ rowCount });
@@ -452,7 +462,7 @@ module.exports = async (fastify, opts) => {
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
       const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status = 'Sold By HomeEspana' or status = 'Sold by HomeEspana') and product_id not in ('${skip_product_ids.join(
-        "','"
+        "','",
       )}')  limit ${perPage} offset ${i - 1}`;
       allPromise.push(fastify.epDbConn.query(queryString));
     }
@@ -504,23 +514,22 @@ module.exports = async (fastify, opts) => {
       "BVMT.H747",
     ];
     const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA'  or status = 'Sold By HomeEspana' or status = 'Sold by HomeEspana') and product_id like 'NCB%' and product_id not like 'NCBKP%' and product_id not in ('${skip_product_ids.join(
-      "','"
+      "','",
     )}') `;
 
     // const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and (product_id like 'NCB%' or region = 'COSTA BLANCA NORTH') and product_id not in ('${skip_product_ids.join(
     //   "','"
     // )}') `;
 
-    const { rows: totalCount, fields } = await fastify.epDbConn.query(
-      queryString
-    );
+    const { rows: totalCount, fields } =
+      await fastify.epDbConn.query(queryString);
     const rowCount = totalCount?.[0]?.count || 0;
     console.log({ rowCount });
     const allPromise = [];
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
       const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA'  or status = 'Sold By HomeEspana' or status = 'Sold by HomeEspana') and product_id like 'NCB%' and product_id not like 'NCBKP%' and product_id not in ('${skip_product_ids.join(
-        "','"
+        "','",
       )}')  limit ${perPage} offset ${i - 1}`;
       allPromise.push(fastify.epDbConn.query(queryString));
     }
@@ -572,16 +581,15 @@ module.exports = async (fastify, opts) => {
       "BVMT.H747",
     ];
     const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status = 'Sold By HomeEspana' or status = 'Sold by HomeEspana') and product_id like 'VLC%' and product_id not like 'VLCKP%' and product_id not in ('${skip_product_ids.join(
-      "','"
+      "','",
     )}') `;
     console.log(queryString);
     // const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and (product_id like 'VLC%' or region = 'Valencia'or region = 'Castellon') and product_id not in ('${skip_product_ids.join(
     //   "','"
     // )}') `;
 
-    const { rows: totalCount, fields } = await fastify.epDbConn.query(
-      queryString
-    );
+    const { rows: totalCount, fields } =
+      await fastify.epDbConn.query(queryString);
 
     const rowCount = totalCount?.[0]?.count || 0;
     console.log({ rowCount });
@@ -589,7 +597,7 @@ module.exports = async (fastify, opts) => {
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
       const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status = 'Sold By HomeEspana' or status = 'Sold by HomeEspana') and product_id like 'VLC%' and product_id not like 'VLCKP%' and product_id not in ('${skip_product_ids.join(
-        "','"
+        "','",
       )}')  limit ${perPage} offset ${i - 1}`;
 
       allPromise.push(fastify.epDbConn.query(queryString));
@@ -642,7 +650,7 @@ module.exports = async (fastify, opts) => {
       "BVMT.H747",
     ];
     const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA'  or status = 'Sold By HomeEspana' or status = 'Sold by HomeEspana' ) and (product_id like 'HE%' or product_id like 'MH%') and product_id not like 'HEKP%' and product_id not like 'MHKP%' and product_id not in ('${skip_product_ids.join(
-      "','"
+      "','",
     )}') `;
     console.log({ queryString });
 
@@ -650,16 +658,15 @@ module.exports = async (fastify, opts) => {
     //   "','"
     // )}') `;
 
-    const { rows: totalCount, fields } = await fastify.epDbConn.query(
-      queryString
-    );
+    const { rows: totalCount, fields } =
+      await fastify.epDbConn.query(queryString);
     const rowCount = totalCount?.[0]?.count || 0;
     console.log({ rowCount });
     const allPromise = [];
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
       const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA'  or status = 'Sold By HomeEspana' or status = 'Sold by HomeEspana') and (product_id like 'HE%' or product_id like 'MH%') and product_id not like 'HEKP%' and product_id not like 'MHKP%' and product_id not in ('${skip_product_ids.join(
-        "','"
+        "','",
       )}')  limit ${perPage} offset ${i - 1}`;
       allPromise.push(fastify.epDbConn.query(queryString));
     }
@@ -711,19 +718,18 @@ module.exports = async (fastify, opts) => {
       "BVMT.H747",
     ];
     const queryString = `SELECT count(*) from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and product_id like '%K%' and product_id not in ('${skip_product_ids.join(
-      "','"
+      "','",
     )}') `;
 
-    const { rows: totalCount, fields } = await fastify.epDbConn.query(
-      queryString
-    );
+    const { rows: totalCount, fields } =
+      await fastify.epDbConn.query(queryString);
     const rowCount = totalCount?.[0]?.count || 0;
     console.log({ rowCount });
     const allPromise = [];
     const perPage = 50;
     for (let i = 1; i < rowCount; i += perPage) {
       const queryString = `SELECT xml_data from properties where (status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA' or status_update_date > '${trancate_date.getFullYear()}/${trancate_date.getMonth()}/${trancate_date.getDate()}') and product_id like '%K%' and product_id not in ('${skip_product_ids.join(
-        "','"
+        "','",
       )}')  limit ${perPage} offset ${i - 1}`;
       allPromise.push(fastify.epDbConn.query(queryString));
     }
@@ -776,7 +782,7 @@ module.exports = async (fastify, opts) => {
           region,
         } = property;
         insert_properties.push(
-          `($${++count},$${++count},$${++count},$${++count},$${++count},$${++count},$${++count})`
+          `($${++count},$${++count},$${++count},$${++count},$${++count},$${++count},$${++count})`,
         );
         datas.push(crm_record_id);
         datas.push(status);
@@ -788,12 +794,12 @@ module.exports = async (fastify, opts) => {
       }
 
       const queryString = `INSERT INTO properties (crm_record_id, status, product_id, modified_time, crm_json, xml_data, region ) values ${insert_properties.join(
-        ","
+        ",",
       )} ON CONFLICT (crm_record_id) DO UPDATE SET xml_data = excluded.xml_data, status = excluded.status, product_id = excluded.product_id, crm_json = excluded.crm_json, region=excluded.region `;
       // console.log({ queryString })
       const { rows: props, fields } = await fastify.epDbConn.query(
         queryString,
-        datas
+        datas,
       );
       return { error: null, data: properties };
     }
@@ -937,8 +943,9 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
-            }`
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
+            }`,
         )
         .join("");
 
@@ -1105,7 +1112,7 @@ module.exports = async (fastify, opts) => {
         let crmApiKey = propertyFieldMapping[key];
         if (key === "baths._cdata" || key === "baths") {
           updatedCRMJSON[crmApiKey] = Number(
-            (valueFromXML?._text || valueFromXML).slice(0, 1)
+            (valueFromXML?._text || valueFromXML).slice(0, 1),
           );
           updatedCRMJSON["Bathroom_Options"] =
             valueFromXML?._text || valueFromXML;
@@ -1114,7 +1121,7 @@ module.exports = async (fastify, opts) => {
 
         if (key === "beds._cdata" || key === "beds") {
           updatedCRMJSON[crmApiKey] = Number(
-            (valueFromXML?._text || valueFromXML).slice(0, 1)
+            (valueFromXML?._text || valueFromXML).slice(0, 1),
           );
           updatedCRMJSON["Bedroom_Options"] =
             valueFromXML?._text || valueFromXML;
@@ -1181,7 +1188,7 @@ module.exports = async (fastify, opts) => {
           ];
           // check wheather xml value is found in propertyTypes if fund put it to updatedCRMJSON otherwise do nothing
           const isFound = propertyTypes.find(
-            (type) => type === valueFromXML?._text
+            (type) => type === valueFromXML?._text,
           );
           if (!isFound) {
             return;
@@ -1236,8 +1243,9 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
-            }`
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
+            }`,
         )
         .join("");
 
@@ -1328,9 +1336,11 @@ module.exports = async (fastify, opts) => {
 
   fastify.get("/syncpropertyportalmarketing", async (request, reply) => {
     // get compact xml data
-    const accessTokenResp = await fastify.axios(
-      process.env.ACCESS_TOKEN_URL
+    const tokenUrl = (process.env.ACCESS_TOKEN_URL || "").replace(
+      /[\\\/\s]+$/,
+      "",
     );
+    const accessTokenResp = await fastify.axios(tokenUrl);
     const accessToken = accessTokenResp?.data?.accessToken || "";
 
     if (accessToken == "") {
@@ -1366,11 +1376,27 @@ module.exports = async (fastify, opts) => {
 
     let returnData = [];
 
+    let urbimedTestData = [];
+
     console.log(xmlProperties.length);
 
     for (const xmlJSON of xmlProperties) {
       const property = {};
       const referenceKey = xmlJSON.ref._text;
+
+      // Urbimed skip: <price>0</price> -> ignore property entirely
+      const feedAgentRaw = (xmlJSON.feed_agent?._text || "")
+        .toString()
+        .toLowerCase()
+        .trim();
+      const priceRaw = xmlJSON.price?._text ?? xmlJSON.price;
+      if (
+        feedAgentRaw === "urbimed" &&
+        priceRaw != null &&
+        String(priceRaw).trim() == 0
+      ) {
+        continue;
+      }
 
       Object.keys(xmlJSON).forEach((parent) => {
         if (
@@ -1404,7 +1430,7 @@ module.exports = async (fastify, opts) => {
 
         if (key === "baths._cdata" || key === "baths") {
           updatedCRMJSON[crmApiKey] = Number(
-            (valueFromXML?._text || valueFromXML).slice(0, 1)
+            (valueFromXML?._text || valueFromXML).slice(0, 1),
           );
           updatedCRMJSON["Bathroom_Options"] =
             valueFromXML?._text || valueFromXML;
@@ -1413,7 +1439,7 @@ module.exports = async (fastify, opts) => {
 
         if (key === "beds._cdata" || key === "beds") {
           updatedCRMJSON[crmApiKey] = Number(
-            (valueFromXML?._text || valueFromXML).slice(0, 1)
+            (valueFromXML?._text || valueFromXML).slice(0, 1),
           );
           updatedCRMJSON["Bedroom_Options"] =
             valueFromXML?._text || valueFromXML;
@@ -1493,12 +1519,12 @@ module.exports = async (fastify, opts) => {
           const isPrivatePoolFound = feature.find(
             (itm) =>
               itm?._text.toLowerCase().includes("pool") &&
-              itm?._text.toLowerCase().includes("private")
+              itm?._text.toLowerCase().includes("private"),
           );
           const isCommunalPoolFound = feature.find(
             (itm) =>
               itm?._text.toLowerCase().includes("pool") &&
-              itm?._text.toLowerCase().includes("communal")
+              itm?._text.toLowerCase().includes("communal"),
           );
 
           //grab property type
@@ -1517,10 +1543,10 @@ module.exports = async (fastify, opts) => {
 
           const value =
             serviceMapForPropertyMarketing[
-            isPrivatePoolFound?._text.toLowerCase()
+              isPrivatePoolFound?._text.toLowerCase()
             ] ||
             serviceMapForPropertyMarketing[
-            isCommunalPoolFound?._text.toLowerCase()
+              isCommunalPoolFound?._text.toLowerCase()
             ] ||
             poolValueBasedOnPropertyType;
 
@@ -1541,6 +1567,8 @@ module.exports = async (fastify, opts) => {
             prefix = "NCB-07";
           } else if (valueFromXML?._text === "Plus villas") {
             prefix = "NCB-42";
+          } else if (valueFromXML?._text === "Urbimed") {
+            prefix = "NCBK-01";
           }
           updatedCRMJSON[crmApiKey] = prefix + ref;
           return;
@@ -1642,8 +1670,9 @@ module.exports = async (fastify, opts) => {
       let updatedImageList = xmlImageList
         .map(
           (img, index) =>
-            `${index + 1} - ${img}${index !== xmlImageList.length - 1 ? "\n" : ""
-            }`
+            `${index + 1} - ${img}${
+              index !== xmlImageList.length - 1 ? "\n" : ""
+            }`,
         )
         .join("");
 
@@ -1691,6 +1720,35 @@ module.exports = async (fastify, opts) => {
         updatedCRMJSON[crmApiKey] = value;
       });
       // console.log({ updatedCRMJSON });
+
+      // Urbimed-specific overrides (partial match, case-insensitive)
+      const feedAgentValue = (xmlJSON.feed_agent?._text || "")
+        .toString()
+        .toLowerCase()
+        .trim();
+      if (feedAgentValue === "urbimed") {
+        // pool: <pool>1</pool> -> Swimming_Pool = "Private"
+        const poolVal = xmlJSON.pool?._text ?? xmlJSON.pool;
+        if (poolVal != null && String(poolVal).trim() == 1) {
+          updatedCRMJSON["Swimming_Pool"] = "Private";
+        }
+
+        // feature overrides (partial substring match)
+        feature?.forEach((itm) => {
+          const txt = itm?._text?.toString().toLowerCase().trim();
+          if (!txt) return;
+          for (const key in urbimedFeatureMap) {
+            if (txt.includes(key)) {
+              updatedCRMJSON[urbimedFeatureMap[key]] = "YES";
+            }
+          }
+        });
+
+        urbimedTestData.push({
+          ref: xmlJSON?.ref?._text,
+          updatedCRMJSON: updatedCRMJSON,
+        });
+      }
 
       if (Object.keys(updatedCRMJSON).length > 0) {
         // updatedCRMJSON.Status = "Live";
@@ -1745,24 +1803,30 @@ module.exports = async (fastify, opts) => {
     }
 
     // return returnData;
+    if (test != true) {
+      return {
+        // returnData,
+        // xmlProperties,
+        // updatedCRMData,
+        // xmlProperties: xmlProperties,
+        xmlPropertiesLength: xmlProperties.length,
+        // XML_Data: updatedCRMData.map((item) => item.XML_Data),
+        // updatedCRMData: updatedCRMData.map((item) =>
+        //   JSON.parse(item.Update_Json)
+        // ),
+      };
+    }
+
     return {
-      // returnData,
-      // xmlProperties,
-      // updatedCRMData,
-      // xmlProperties: xmlProperties,
       xmlPropertiesLength: xmlProperties.length,
-      // XML_Data: updatedCRMData.map((item) => item.XML_Data),
-      // updatedCRMData: updatedCRMData.map((item) =>
-      //   JSON.parse(item.Update_Json)
-      // ),
+      urbimedCount: urbimedTestData.length,
+      urbimedTestData,
     };
   });
 
   fastify.get("/fetchpropertyidsmarketing", async (request, reply) => {
     // get compact xml data
-    const accessTokenResp = await fastify.axios(
-      process.env.ACCESS_TOKEN_URL
-    );
+    const accessTokenResp = await fastify.axios(process.env.ACCESS_TOKEN_URL);
     const accessToken = accessTokenResp?.data?.accessToken || "";
 
     if (accessToken == "") {
@@ -1809,9 +1873,7 @@ module.exports = async (fastify, opts) => {
   });
   fastify.get("/fetchpropertyidsproduction", async (request, reply) => {
     // get compact xml data
-    const accessTokenResp = await fastify.axios(
-      process.env.ACCESS_TOKEN_URL
-    );
+    const accessTokenResp = await fastify.axios(process.env.ACCESS_TOKEN_URL);
     const accessToken = accessTokenResp?.data?.accessToken || "";
 
     if (accessToken == "") {
