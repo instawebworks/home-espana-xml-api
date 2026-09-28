@@ -563,6 +563,85 @@ module.exports = async (fastify, opts) => {
 
     reply.type("application/xml").send(xml_str);
   });
+  fastify.get("/ncbplus/properties", async (request, reply) => {
+    // NCB-Plus Villas feed: NCB feed minus
+    //  - price < 400000
+    //  - Agent_Property = true
+    //  - New_Build_Resale = 'New Build'
+    // and with a fixed set of nodes stripped from each <property>.
+    const skip_product_ids = [
+      "BVCA.H419",
+      "BVMT.H496",
+      "BVCA.H416",
+      "BVMT.H747",
+    ];
+    const whereClause = `(status = 'Live' or status = 'live' or status = 'SOLD BY HOMEESPANA'  or status = 'Sold By HomeEspana' or status = 'Sold by HomeEspana')
+      and product_id like 'NCB%' and product_id not like 'NCBKP%'
+      and product_id not in ('${skip_product_ids.join("','")}')
+      and crm_json is not null
+      and coalesce(nullif(crm_json->>'Price', ''), '0')::numeric >= 400000
+      and coalesce(crm_json->>'Agent_Property', 'false') <> 'true'
+      and coalesce(crm_json->>'New_Build_Resale', '') <> 'New Build'`;
+
+    const { rows: totalCount } = await fastify.epDbConn.query(
+      `SELECT count(*) from properties where ${whereClause}`,
+    );
+    const rowCount = Number(totalCount?.[0]?.count || 0);
+    console.log({ ncbplus_rowCount: rowCount });
+
+    const allPromise = [];
+    const perPage = 50;
+    for (let i = 0; i < rowCount; i += perPage) {
+      allPromise.push(
+        fastify.epDbConn.query(
+          `SELECT xml_data from properties where ${whereClause} order by id limit ${perPage} offset ${i}`,
+        ),
+      );
+    }
+    const allData = await Promise.all(allPromise);
+
+    const stripNodes = [
+      "video",
+      "virtual_tour_url",
+      "catastral",
+      "Sub_Type_Idealista",
+      "Condition_Idealista",
+      "Floor",
+      "It_is_the_top_floor_of_the_building",
+      "Will_the_property_be_sold_in_any_of_these_exception",
+      "number",
+      "street",
+      "latitude",
+      "longitude",
+      "portals",
+    ];
+    const stripRe = new RegExp(
+      stripNodes
+        .map((n) => "<" + n + ">[\\s\\S]*?</" + n + ">|<" + n + "\\s*/>")
+        .join("|"),
+      "g",
+    );
+    // <location> only held latitude/longitude; drop it once emptied.
+    const emptyLocationRe = /<location>\s*<\/location>|<location\s*\/>/g;
+
+    let xml_str =
+      "<?xml version='1.0' encoding='utf-8' standalone='yes'?><root><kyero><feed_version>3</feed_version></kyero>";
+
+    allData.forEach((indvData) => {
+      indvData?.rows?.forEach((prop) => {
+        xml_str += (prop?.xml_data || "")
+          .replace(stripRe, "")
+          .replace(emptyLocationRe, "");
+      });
+    });
+
+    xml_str += "</root>";
+
+    xml_str = xml_str.replaceAll("&", "&amp;");
+    xml_str = xml_str.replaceAll('"', "&quot;");
+
+    reply.type("application/xml").send(xml_str);
+  });
   fastify.get("/vlc/properties", async (request, reply) => {
     // const cachedXML = await fastify.cacheConn.get("sync_properties");
     // if (cachedXML) {
